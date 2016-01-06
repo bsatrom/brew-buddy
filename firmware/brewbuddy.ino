@@ -1,11 +1,8 @@
-#include "SPI.h"
-
 // Thermocouple Includes
-#include "SparkFunMAX31855k.h"
+//#include "SparkFunMAX31855k.h"
 
 // TFT Includes
-#include "Adafruit_GFX.h"
-#include "Adafruit_ILI9340.h"
+#include "Adafruit_ILI9341.h"
 
 // Thermocouple Variables
 const uint8_t CHIP_SELECT_PIN = 10;
@@ -13,7 +10,7 @@ const uint8_t CHIP_SELECT_PIN = 10;
 const uint8_t VCC = 5;
 const uint8_t GND = 6;
 // Instantiate an instance of the SparkFunMAX31855k class
-SparkFunMAX31855k probe(CHIP_SELECT_PIN, VCC, GND);
+//SparkFunMAX31855k probe(CHIP_SELECT_PIN, VCC, GND);
 
 // TFT Variables
 #define _sclk 13
@@ -23,7 +20,8 @@ SparkFunMAX31855k probe(CHIP_SELECT_PIN, VCC, GND);
 #define _dc 9
 #define _rst 8
 // Use hardware SPI
-Adafruit_ILI9340 tft = Adafruit_ILI9340(_cs, _dc, _rst);
+// cs = A2, dc = A1, rst = A0
+Adafruit_ILI9341 tft = Adafruit_ILI9341(A2, A1, A0);
 
 void setup() {
   Serial.begin(9600);
@@ -38,7 +36,7 @@ void setup() {
 }
 
 void loop() {
-  printReading(readTemp());
+  //printReading(readTemp());
   delay(5000);
 }
 
@@ -46,15 +44,15 @@ void printSplash() {
   clearScreen();
   tft.setCursor(0, 40);
   printHeadingTextLine("BrewBuddy");
-  printHeadingTextLine("v0.5");
+  printHeadingTextLine("v0.6");
   printSubheadingLine("Created by");
   printSubheadingLine("Brandon Satrom");
 }
 
 void clearScreen() {
-  tft.fillScreen(ILI9340_BLACK);
+  tft.fillScreen(ILI9341_BLACK);
   tft.setCursor(0, 0);
-  tft.setTextColor(ILI9340_WHITE);
+  tft.setTextColor(ILI9341_WHITE);
 }
 
 void printHeadingTextLine(String text) {
@@ -68,20 +66,20 @@ void printSubheadingLine(String text) {
 }
 
 float readTemp() {
-  float temperature = probe.readTempF();
+  //float temperature = probe.readTempF();
 
-  if (!isnan(temperature)) {
-    return temperature;
-  } else {
-    Serial.println("Could not read temp");
-    return 0;
-  }
+  //if (!isnan(temperature)) {
+  //  return temperature;
+  //} else {
+  //  Serial.println("Could not read temp");
+  //  return 0;
+  //}
 }
 
 void printReading(float reading) {
-  tft.fillScreen(ILI9340_BLACK);
+  tft.fillScreen(ILI9341_BLACK);
   tft.setCursor(0, 160);
-  tft.setTextColor(ILI9340_WHITE);
+  tft.setTextColor(ILI9341_WHITE);
   tft.setTextSize(5);
   tft.println(reading);
 }
