@@ -1,2 +1,3 @@
-# brew-buddy-sensors
-Brew Buddy Board Controller
+# Brew Buddy Sensors
+
+Board Controller Code for the Brew Buddy Project. 
