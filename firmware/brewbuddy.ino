@@ -24,6 +24,7 @@ unsigned long tempInterval = 5000;
 unsigned long startTime = 0;
 unsigned long elapsedTime;
 float previousTemp = 0;
+bool firstLoop = true;
 
 //Text Size Variables
 const uint8_t headingTextSize = 4;
@@ -50,16 +51,15 @@ void setup() {
 void loop() {
   unsigned long currentMillis = millis();
 
-  if((currentMillis % 1000L) == 0) {
-    elapsedTime = currentMillis - startTime;
-
-    displayTime(elapsedTime);
-  }
-
   if(currentMillis - previousTempMillis > tempInterval) {
     previousTempMillis = currentMillis;
 
     float temp = readTemp();
+
+    if (firstLoop) {
+      displayTempHeading();
+      displayTempHistoryHeading();
+    }
 
     // Don't update the display if the temp hasn't changed
     if (temp != previousTemp) {
@@ -67,6 +67,17 @@ void loop() {
 
       printReading(temp);
     }
+  }
+
+  if((currentMillis % 1000L) == 0) {
+    elapsedTime = currentMillis - startTime;
+
+    if (firstLoop) {
+      displayTimeHeading();
+      firstLoop = false;
+    }
+
+    displayTime(elapsedTime);
   }
 }
 
@@ -120,11 +131,29 @@ void printReading(float reading) {
   tft.println(reading);
 }
 
+void displayTimeHeading() {
+  tft.setCursor(0, 140);
+  tft.setTextSize(2);
+  tft.println("Elapsed Time");
+}
+
+void displayTempHeading() {
+  tft.setCursor(0, 40);
+  tft.setTextSize(2);
+  tft.println("Wort Temp (F)");
+}
+
+void displayTempHistoryHeading() {
+  tft.setCursor(0, 200);
+  tft.setTextSize(2);
+  tft.println("Temp History");
+}
+
 void displayTime(float elapsedTime) {
   String timeString = calcTimeToDisplay(elapsedTime); //HERE
 
-  tft.fillRect(0, 140, 240, elapsedTimeSize * pixelMultiplier, ILI9341_BLACK);
-  tft.setCursor(0, 140);
+  tft.fillRect(0, 160, 240, elapsedTimeSize * pixelMultiplier, ILI9341_BLACK);
+  tft.setCursor(0, 160);
   tft.setTextSize(elapsedTimeSize);
   tft.println(timeString);
 }
