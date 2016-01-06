@@ -1,0 +1,14 @@
+{
+  "event": "BatchTemp",
+  "url": "http://api.everlive.com/v1/ay2aucpakzpu80nk/readings",
+  "requestType": "POST",
+  "headers": {
+    "Authorization": "Bearer: tYaOlVyJHUp6eornxaElrAUkfZVohshF",
+    "Cache-Control": "no-cache"
+  },
+  "form": {
+    "temperature": "{{a}}",
+    "DeviceId": "{{SPARK_CORE_ID}}"
+  },
+  "mydevices": true
+}
