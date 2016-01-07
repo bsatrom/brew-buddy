@@ -1,4 +1,5 @@
 #include "math.h"
+#include "QueueArray.h"
 
 // Thermocouple Includes
 #include "SparkFunMAX31855k.h"
@@ -32,6 +33,12 @@ const uint8_t subheadTextSize = 2;
 const uint8_t tempTextSize = 7;
 const uint8_t elapsedTimeSize = 3;
 const uint8_t pixelMultiplier = 7; //Used to clear text portions of the screen
+
+//QueueArray for the last 22 temperature readings for the TFT Graph
+QueueArray<int> tempGraphArray;
+
+const uint8_t lowTemp = 65;
+const uint8_t highTemp = 165;
 
 void setup() {
   Serial.begin(9600);
@@ -67,6 +74,8 @@ void loop() {
 
       printReading(temp);
     }
+
+    updateChart(temp);
   }
 
   if((currentMillis % 1000L) == 0) {
@@ -127,8 +136,19 @@ void postTemp(float temp) {
 void printReading(float reading) {
   tft.fillRect(0, 60, 240, tempTextSize * pixelMultiplier, ILI9341_BLACK);
   tft.setCursor(0, 60);
+
+  if (reading <= 80) {
+    tft.setTextColor(ILI9341_BLUE);
+  } else if (reading > 80 && reading <= 110) {
+    tft.setTextColor(ILI9341_YELLOW);
+  } else if (reading > 110) {
+    tft.setTextSize(ILI9341_RED);
+  }
+
   tft.setTextSize(tempTextSize);
   tft.println(reading);
+
+  tft.setTextColor(ILI9341_WHITE);
 }
 
 void displayTimeHeading() {
@@ -177,4 +197,44 @@ String calcTimeToDisplay(float elapsedTime) {
   timeString += timeRemainder;
 
   return timeString;
+}
+
+void updateChart(float temp) {
+  int yLocation;
+  int yDiff;
+  int roundedTemp = (int)temp;
+  int arrayLength = 0;
+
+  if (roundedTemp < lowTemp) {
+    yLocation = lowTemp;
+  } else if (roundedTemp > highTemp) {
+    yLocation = highTemp;
+  } else {
+    yDiff = roundedTemp - lowTemp;
+
+    yLocation = 320 - yDiff;
+  }
+
+  if(tempGraphArray.count() == 22) {
+    tempGraphArray.dequeue();
+  }
+  tempGraphArray.enqueue(yLocation);
+
+  tft.fillRect(0, 220, 240, 120, ILI9341_BLACK);
+
+  //HERE. Need to iterate on the QueueArray for displaying on the screen
+  if (tempGraphArray.count()  > 22) {
+    arrayLength = 22;
+  } else {
+    arrayLength = tempGraphArray.count();
+  }
+
+  for (int i = 0; i < arrayLength; i++) {
+    int currentLocation = tempGraphArray.dequeue();
+
+    tft.fillCircle(10 * (i+1), currentLocation, 4, ILI9341_RED);
+
+    //Queue the front value back onto the end of the array
+    tempGraphArray.enqueue(currentLocation);
+  }
 }
