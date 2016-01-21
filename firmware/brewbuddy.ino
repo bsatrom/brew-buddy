@@ -206,9 +206,9 @@ void updateChart(float temp) {
   int arrayLength = 0;
 
   if (roundedTemp < lowTemp) {
-    yLocation = lowTemp;
+    yLocation = 315;
   } else if (roundedTemp > highTemp) {
-    yLocation = highTemp;
+    yLocation = 220;
   } else {
     yDiff = roundedTemp - lowTemp;
 
