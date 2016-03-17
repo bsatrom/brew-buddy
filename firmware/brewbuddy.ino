@@ -25,7 +25,6 @@ unsigned long tempInterval = 5000;
 unsigned long startTime = 0;
 unsigned long elapsedTime;
 float previousTemp = 0;
-bool firstLoop = true;
 
 //Text Size Variables
 const uint8_t headingTextSize = 4;
@@ -36,13 +35,18 @@ const uint8_t pixelMultiplier = 7; //Used to clear text portions of the screen
 
 //QueueArray for the last 22 temperature readings for the TFT Graph
 QueueArray<int> tempGraphArray;
-
 const uint8_t lowTemp = 65;
 const uint8_t highTemp = 165;
+
+//Brew Stage Variables
+bool isActive = false;
 
 void setup() {
   Serial.begin(9600);
   while (!Serial);
+
+  //Brew Stage cloud functions
+  Particle.function("brew", toggleBrewStage);
 
   // Initialize TFT
   tft.begin();
@@ -52,42 +56,61 @@ void setup() {
   delay(3000);
   tft.fillScreen(ILI9341_BLACK);
 
-  startTime = millis();
+  printSubheadingLine("Waiting for Brew...");
 }
 
 void loop() {
-  unsigned long currentMillis = millis();
+  if (isActive) {
+    unsigned long currentMillis = millis();
 
-  if(currentMillis - previousTempMillis > tempInterval) {
-    previousTempMillis = currentMillis;
+    if(currentMillis - previousTempMillis > tempInterval) {
+      previousTempMillis = currentMillis;
 
-    float temp = readTemp();
+      float temp = readTemp();
 
-    if (firstLoop) {
-      displayTempHeading();
-      displayTempHistoryHeading();
+      // Don't update the display if the temp hasn't changed
+      if (temp != previousTemp) {
+        previousTemp = temp;
+
+        printReading(temp);
+      }
+
+      updateChart(temp);
     }
 
-    // Don't update the display if the temp hasn't changed
-    if (temp != previousTemp) {
-      previousTemp = temp;
+    if((currentMillis % 1000L) == 0) {
+      elapsedTime = currentMillis - startTime;
 
-      printReading(temp);
+      displayTime(elapsedTime);
     }
+  }
+}
 
-    updateChart(temp);
+void activateBrewStage() {
+  startTime = millis();
+
+  displayTempHeading();
+  displayTempHistoryHeading();
+  displayTimeHeading();
+}
+
+int toggleBrewStage(String command) {
+  if (command == "start" && !isActive) {
+    isActive = true;
+    clearScreen();
+    activateBrewStage();
+
+    return 1;
+  } else if (command == "stop"){
+    isActive = false;
+    clearScreen();
+    tft.setCursor(0, 140);
+    printSubheadingLine("Waiting for Brew...");
+
+    return 1;
   }
 
-  if((currentMillis % 1000L) == 0) {
-    elapsedTime = currentMillis - startTime;
-
-    if (firstLoop) {
-      displayTimeHeading();
-      firstLoop = false;
-    }
-
-    displayTime(elapsedTime);
-  }
+  return 0;
 }
 
 void printSplash() {
