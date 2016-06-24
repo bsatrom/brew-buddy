@@ -57,6 +57,8 @@ void setup() {
   tft.fillScreen(ILI9341_BLACK);
 
   printSubheadingLine("Waiting for Brew...");
+
+  Particle.publish("Status", "Ready");
 }
 
 void loop() {
