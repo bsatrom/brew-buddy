@@ -119,7 +119,7 @@ void printSplash() {
   clearScreen();
   tft.setCursor(0, 40);
   printHeadingTextLine("BrewBuddy");
-  printHeadingTextLine("v0.6");
+  printHeadingTextLine("v0.7");
   printSubheadingLine("Created by");
   printSubheadingLine("Brandon Satrom");
 }
