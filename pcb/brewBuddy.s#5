@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!DOCTYPE eagle SYSTEM "eagle.dtd">
-<eagle version="7.3.0">
+<eagle version="7.5.0">
 <drawing>
 <settings>
 <setting alwaysvectorfont="yes"/>
@@ -141,18 +141,18 @@
 <library name="Spark">
 <packages>
 <package name="PHOTON">
-<pad name="1" x="1.27" y="32.258" drill="1.016" diameter="1.8796" shape="long"/>
-<pad name="2" x="1.27" y="29.718" drill="1.016" diameter="1.8796" shape="long"/>
-<pad name="3" x="1.27" y="27.178" drill="1.016" diameter="1.8796" shape="long"/>
-<pad name="4" x="1.27" y="24.638" drill="1.016" diameter="1.8796" shape="long"/>
-<pad name="5" x="1.27" y="22.098" drill="1.016" diameter="1.8796" shape="long"/>
-<pad name="6" x="1.27" y="19.558" drill="1.016" diameter="1.8796" shape="long"/>
-<pad name="7" x="1.27" y="17.018" drill="1.016" diameter="1.8796" shape="long"/>
-<pad name="8" x="1.27" y="14.478" drill="1.016" diameter="1.8796" shape="long"/>
-<pad name="9" x="1.27" y="11.938" drill="1.016" diameter="1.8796" shape="long"/>
-<pad name="10" x="1.27" y="9.398" drill="1.016" diameter="1.8796" shape="long"/>
-<pad name="11" x="1.27" y="6.858" drill="1.016" diameter="1.8796" shape="long"/>
-<pad name="12" x="1.27" y="4.318" drill="1.016" diameter="1.8796" shape="long"/>
+<pad name="1" x="1.27" y="32.258" drill="1.016" diameter="1.8796"/>
+<pad name="2" x="1.27" y="29.718" drill="1.016" diameter="1.8796"/>
+<pad name="3" x="1.27" y="27.178" drill="1.016" diameter="1.8796"/>
+<pad name="4" x="1.27" y="24.638" drill="1.016" diameter="1.8796"/>
+<pad name="5" x="1.27" y="22.098" drill="1.016" diameter="1.8796"/>
+<pad name="6" x="1.27" y="19.558" drill="1.016" diameter="1.8796"/>
+<pad name="7" x="1.27" y="17.018" drill="1.016" diameter="1.8796"/>
+<pad name="8" x="1.27" y="14.478" drill="1.016" diameter="1.8796"/>
+<pad name="9" x="1.27" y="11.938" drill="1.016" diameter="1.8796"/>
+<pad name="10" x="1.27" y="9.398" drill="1.016" diameter="1.8796"/>
+<pad name="11" x="1.27" y="6.858" drill="1.016" diameter="1.8796"/>
+<pad name="12" x="1.27" y="4.318" drill="1.016" diameter="1.8796"/>
 <text x="2.54" y="-1.778" size="1.27" layer="25" ratio="10">&gt;NAME</text>
 <rectangle x1="1.016" y1="16.764" x2="1.524" y2="17.272" layer="51" rot="R270"/>
 <rectangle x1="1.016" y1="19.304" x2="1.524" y2="19.812" layer="51" rot="R270"/>
@@ -166,18 +166,18 @@
 <rectangle x1="1.016" y1="9.144" x2="1.524" y2="9.652" layer="51" rot="R270"/>
 <rectangle x1="1.016" y1="6.604" x2="1.524" y2="7.112" layer="51" rot="R270"/>
 <rectangle x1="1.016" y1="4.064" x2="1.524" y2="4.572" layer="51" rot="R270"/>
-<pad name="13" x="19.05" y="4.318" drill="1.016" diameter="1.8796" shape="long" rot="R180"/>
-<pad name="14" x="19.05" y="6.858" drill="1.016" diameter="1.8796" shape="long" rot="R180"/>
-<pad name="15" x="19.05" y="9.398" drill="1.016" diameter="1.8796" shape="long" rot="R180"/>
-<pad name="16" x="19.05" y="11.938" drill="1.016" diameter="1.8796" shape="long" rot="R180"/>
-<pad name="17" x="19.05" y="14.478" drill="1.016" diameter="1.8796" shape="long" rot="R180"/>
-<pad name="18" x="19.05" y="17.018" drill="1.016" diameter="1.8796" shape="long" rot="R180"/>
-<pad name="19" x="19.05" y="19.558" drill="1.016" diameter="1.8796" shape="long" rot="R180"/>
-<pad name="20" x="19.05" y="22.098" drill="1.016" diameter="1.8796" shape="long" rot="R180"/>
-<pad name="21" x="19.05" y="24.638" drill="1.016" diameter="1.8796" shape="long" rot="R180"/>
-<pad name="22" x="19.05" y="27.178" drill="1.016" diameter="1.8796" shape="long" rot="R180"/>
-<pad name="23" x="19.05" y="29.718" drill="1.016" diameter="1.8796" shape="long" rot="R180"/>
-<pad name="24" x="19.05" y="32.258" drill="1.016" diameter="1.8796" shape="long" rot="R180"/>
+<pad name="13" x="19.05" y="4.318" drill="1.016" diameter="1.8796" rot="R180"/>
+<pad name="14" x="19.05" y="6.858" drill="1.016" diameter="1.8796" rot="R180"/>
+<pad name="15" x="19.05" y="9.398" drill="1.016" diameter="1.8796" rot="R180"/>
+<pad name="16" x="19.05" y="11.938" drill="1.016" diameter="1.8796" rot="R180"/>
+<pad name="17" x="19.05" y="14.478" drill="1.016" diameter="1.8796" rot="R180"/>
+<pad name="18" x="19.05" y="17.018" drill="1.016" diameter="1.8796" rot="R180"/>
+<pad name="19" x="19.05" y="19.558" drill="1.016" diameter="1.8796" rot="R180"/>
+<pad name="20" x="19.05" y="22.098" drill="1.016" diameter="1.8796" rot="R180"/>
+<pad name="21" x="19.05" y="24.638" drill="1.016" diameter="1.8796" rot="R180"/>
+<pad name="22" x="19.05" y="27.178" drill="1.016" diameter="1.8796" rot="R180"/>
+<pad name="23" x="19.05" y="29.718" drill="1.016" diameter="1.8796" rot="R180"/>
+<pad name="24" x="19.05" y="32.258" drill="1.016" diameter="1.8796" rot="R180"/>
 <text x="2.54" y="-3.302" size="1.27" layer="27" rot="SR0">&gt;VALUE</text>
 <rectangle x1="18.796" y1="19.304" x2="19.304" y2="19.812" layer="51" rot="R90"/>
 <rectangle x1="18.796" y1="16.764" x2="19.304" y2="17.272" layer="51" rot="R90"/>
@@ -556,25 +556,25 @@ by exp-lbrs.ulp</description>
 <description>1x10 2.0mm Header Pins</description>
 <wire x1="-11.7" y1="0.635" x2="-11.7" y2="-0.635" width="0.2032" layer="51"/>
 <rectangle x1="-10.234" y1="-0.254" x2="-9.726" y2="0.254" layer="51"/>
-<rectangle x1="-7.73511875" y1="-0.254" x2="-7.22711875" y2="0.254" layer="51"/>
-<rectangle x1="-5.11885625" y1="-0.224553125" x2="-4.61085625" y2="0.283446875" layer="51"/>
-<rectangle x1="-2.590628125" y1="-0.254" x2="-2.082628125" y2="0.254" layer="51"/>
-<rectangle x1="-0.033059375" y1="-0.254" x2="0.474940625" y2="0.254" layer="51"/>
-<rectangle x1="2.495165625" y1="-0.254" x2="3.003165625" y2="0.254" layer="51"/>
-<rectangle x1="5.11143125" y1="-0.254" x2="5.61943125" y2="0.254" layer="51"/>
-<rectangle x1="7.63469375" y1="-0.254" x2="8.14269375" y2="0.254" layer="51"/>
-<rectangle x1="10.211" y1="-0.254" x2="10.719" y2="0.254" layer="51"/>
-<rectangle x1="12.846" y1="-0.254" x2="13.354" y2="0.254" layer="51"/>
-<pad name="1" x="-10" y="0" drill="1" diameter="2.286" shape="square" rot="R90"/>
-<pad name="2" x="-7.44" y="0" drill="1" diameter="2.032" shape="long" rot="R90"/>
-<pad name="3" x="-4.88" y="0" drill="1" diameter="2.032" shape="long" rot="R90"/>
-<pad name="4" x="-2.34" y="0" drill="1" diameter="2.032" shape="long" rot="R90"/>
-<pad name="5" x="0.24" y="0" drill="1" diameter="2.032" shape="long" rot="R90"/>
-<pad name="6" x="2.8" y="0" drill="1" diameter="2.032" shape="long" rot="R90"/>
-<pad name="7" x="5.36" y="0" drill="1" diameter="2.032" shape="long" rot="R90"/>
-<pad name="8" x="7.92" y="0" drill="1" diameter="2.032" shape="long" rot="R90"/>
-<pad name="9" x="10.48" y="0" drill="1" diameter="2.032" shape="long" rot="R90"/>
-<pad name="10" x="13.04" y="0" drill="1" diameter="2.032" shape="long" rot="R90"/>
+<rectangle x1="-8.234" y1="-0.254" x2="-7.726" y2="0.254" layer="51"/>
+<rectangle x1="-6.234" y1="-0.254" x2="-5.726" y2="0.254" layer="51"/>
+<rectangle x1="-4.234" y1="-0.254" x2="-3.726" y2="0.254" layer="51"/>
+<rectangle x1="-2.234" y1="-0.254" x2="-1.726" y2="0.254" layer="51"/>
+<rectangle x1="-0.234" y1="-0.254" x2="0.274" y2="0.254" layer="51"/>
+<rectangle x1="1.766" y1="-0.254" x2="2.274" y2="0.254" layer="51"/>
+<rectangle x1="3.766" y1="-0.254" x2="4.274" y2="0.254" layer="51"/>
+<rectangle x1="5.766" y1="-0.254" x2="6.274" y2="0.254" layer="51"/>
+<rectangle x1="7.766" y1="-0.254" x2="8.274" y2="0.254" layer="51"/>
+<pad name="1" x="-10" y="0" drill="1" diameter="1.5" shape="square" rot="R90"/>
+<pad name="2" x="-8" y="0" drill="1" diameter="1.5" rot="R90"/>
+<pad name="3" x="-6" y="0" drill="1" diameter="1.5" rot="R90"/>
+<pad name="4" x="-4" y="0" drill="1" diameter="1.5" rot="R90"/>
+<pad name="5" x="-2" y="0" drill="1" diameter="1.5" rot="R90"/>
+<pad name="6" x="0" y="0" drill="1" diameter="1.5" rot="R90"/>
+<pad name="7" x="2" y="0" drill="1" diameter="1.5" rot="R90"/>
+<pad name="8" x="4" y="0" drill="1" diameter="1.5" rot="R90"/>
+<pad name="9" x="6" y="0" drill="1" diameter="1.5" rot="R90"/>
+<pad name="10" x="8" y="0" drill="1" diameter="1.5" rot="R90"/>
 <text x="-10.7762" y="1.8288" size="0.8128" layer="25" ratio="18">&gt;NAME</text>
 <text x="-10.7" y="-3.175" size="0.4064" layer="27" ratio="10">&gt;VALUE</text>
 </package>

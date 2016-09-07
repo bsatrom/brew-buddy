@@ -716,6 +716,9 @@ by exp-lbrs.ulp</description>
 <signal name="N$25">
 <via x="59.910984375" y="-0.508509375" extent="1-16" drill="3.2" diameter="6.4516"/>
 </signal>
+<signal name="N$26">
+<via x="59.940309375" y="16.275540625" extent="1-16" drill="3.2" diameter="6.4516"/>
+</signal>
 </signals>
 </board>
 </drawing>
