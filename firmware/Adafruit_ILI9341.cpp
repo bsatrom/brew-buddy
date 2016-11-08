@@ -265,6 +265,21 @@ void Adafruit_ILI9341::drawPixel(int16_t x, int16_t y, uint16_t color) {
 	pinHI(_cs);		//digitalWrite(_cs, HIGH);
 }
 
+void Adafruit_ILI9341::drawBitmap(int16_t x, int16_t y,
+			      const uint8_t *bitmap, int16_t w, int16_t h,
+			      uint16_t color) {
+
+	int16_t i, j, byteWidth = (w + 7) / 8;
+
+  for(j=0; j<h; j++) {
+    for(i=0; i<w; i++ ) {
+      if(pgm_read_byte(bitmap + j * byteWidth + i / 8) & (128 >> (i & 7))) {
+	drawPixel(x+i, y+j, color);
+      }
+    }
+  }
+}
+
 void Adafruit_ILI9341::drawFastVLine(int16_t x, int16_t y, int16_t h,
 	uint16_t color) {
 

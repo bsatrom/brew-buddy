@@ -126,6 +126,8 @@ public:
 		pushColor(uint16_t color),
 		fillScreen(uint16_t color),
 		drawPixel(int16_t x, int16_t y, uint16_t color),
+    drawBitmap(int16_t x, int16_t y, const uint8_t *bitmap,
+      int16_t w, int16_t h, uint16_t color),
 		drawFastVLine(int16_t x, int16_t y, int16_t h, uint16_t color),
 		drawFastHLine(int16_t x, int16_t y, int16_t w, uint16_t color),
 		fillRect(int16_t x, int16_t y, int16_t w, int16_t h,

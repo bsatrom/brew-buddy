@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!DOCTYPE eagle SYSTEM "eagle.dtd">
-<eagle version="7.3.0">
+<eagle version="7.6.0">
 <drawing>
 <settings>
 <setting alwaysvectorfont="yes"/>
@@ -565,7 +565,7 @@ by exp-lbrs.ulp</description>
 <rectangle x1="7.63469375" y1="-0.254" x2="8.14269375" y2="0.254" layer="51"/>
 <rectangle x1="10.211" y1="-0.254" x2="10.719" y2="0.254" layer="51"/>
 <rectangle x1="12.846" y1="-0.254" x2="13.354" y2="0.254" layer="51"/>
-<pad name="1" x="-10" y="0" drill="1" diameter="2.286" shape="square" rot="R90"/>
+<pad name="1" x="-10" y="0" drill="1" diameter="1.9304" shape="square" rot="R90"/>
 <pad name="2" x="-7.44" y="0" drill="1" diameter="2.032" shape="long" rot="R90"/>
 <pad name="3" x="-4.88" y="0" drill="1" diameter="2.032" shape="long" rot="R90"/>
 <pad name="4" x="-2.34" y="0" drill="1" diameter="2.032" shape="long" rot="R90"/>
