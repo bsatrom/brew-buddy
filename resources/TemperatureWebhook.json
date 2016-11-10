@@ -1,14 +1,20 @@
 {
-  "event": "BatchTemp",
-  "url": "http://api.everlive.com/v1/ay2aucpakzpu80nk/readings",
+  "event": "BrewStageTemp",
+  "url": "https://brew-buddy-e99a0.firebaseio.com/brew_stage_event.json",
   "requestType": "POST",
+  "query": {
+    "auth":"aAoKrCBsYFX18zfFOKKbJTPbwZ1HAMqsUB7cBAnH"
+  },
   "headers": {
-    "Authorization": "Bearer: tYaOlVyJHUp6eornxaElrAUkfZVohshF",
-    "Cache-Control": "no-cache"
+    "Content-Type": "application/json"
   },
-  "form": {
+  "json": {
+    "device_id": "{{SPARK_CORE_ID}}",
     "temperature": "{{a}}",
-    "DeviceId": "{{SPARK_CORE_ID}}"
+    "brew_id": "{{b}}",
+    "brew_stage": "{{c}}",
+    "date_created": "{{PARTICLE_PUBLISHED_AT}}"
   },
-  "mydevices": true
+  "mydevices": true,
+  "noDefaults": true
 }

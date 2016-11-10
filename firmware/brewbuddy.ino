@@ -648,9 +648,16 @@ const unsigned char beerBitmap [] PROGMEM =  {
 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff,
 };
 
+String brewStage;
+String brewId;
+
 void setup() {
   Serial.begin(9600);
   while (!Serial);
+
+  //Particle Variables
+  Particle.variable("brewStage", brewStage);
+  Particle.variable("brewId", brewId);
 
   //Brew Stage cloud functions
   Particle.function("brew", toggleBrewStage);
@@ -697,20 +704,38 @@ void loop() {
 void activateBrewStage() {
   startTime = millis();
 
-  displayStageName("Initial Boil");
+  displayStageName(brewStage);
   displayTempHeading();
   displayTempHistoryHeading();
   displayTimeHeading();
 }
 
 int toggleBrewStage(String command) {
-  if (command == "start" && !isActive) {
+  String commands[3];
+  int counter = 0;
+  char buffer[63]; //63 characters is the max length of the Particle string
+
+  command.toCharArray(buffer, 63);
+
+  char* cmd = strtok(buffer, ",");
+  while (cmd != 0)
+  {
+    commands[counter] = cmd;
+    counter++;
+
+    cmd = strtok (NULL, ",");
+  }
+
+  brewStage = commands[2];
+  brewId = commands[1];
+
+  if (commands[0] == "start" && !isActive) {
     isActive = true;
     clearScreen();
     activateBrewStage();
 
     return 1;
-  } else if (command == "stop"){
+  } else if (commands[0] == "stop"){
     isActive = false;
     clearScreen();
     tft.setCursor(0, 140);
@@ -724,7 +749,7 @@ int toggleBrewStage(String command) {
 
 void printSplash() {
   tft.setRotation(2);
-  
+
   clearScreen();
 
   tft.setCursor(0, 0);
@@ -770,8 +795,8 @@ float readTemp() {
 }
 
 void postTemp(float temp) {
-  String payload = "{ \"a\":" + String(temp, 2) + " }";
-  Particle.publish("BatchTemp", payload);
+  String payload = "{ \"a\":" + String(temp, 2) + ", \"b\": \"" + brewId + "\", \"c\": \"" + brewStage + "\" }";
+  Particle.publish("BrewStageTemp", payload);
 }
 
 void printReading(float reading) {
