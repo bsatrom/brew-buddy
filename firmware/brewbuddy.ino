@@ -725,6 +725,7 @@ int toggleBrewStage(String command) {
 
     cmd = strtok (NULL, ",");
   }
+  free(cmd);
 
   brewStage = commands[2];
   brewId = commands[1];
