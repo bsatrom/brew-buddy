@@ -32,7 +32,7 @@ float previousTemp = 0;
 //Text Size Variables
 const uint8_t headingTextSize = 4;
 const uint8_t subheadTextSize = 2;
-const uint8_t tempTextSize = 7;
+const uint8_t tempTextSize = 5;
 const uint8_t elapsedTimeSize = 3;
 const uint8_t pixelMultiplier = 7; //Used to clear text portions of the screen
 
@@ -685,9 +685,11 @@ void loop() {
 
       // Don't update the display if the temp hasn't changed
       if (temp != previousTemp) {
-        previousTemp = temp;
 
-        printReading(temp);
+        if (temp != 0) {
+          previousTemp = temp;
+        }
+        printReading(previousTemp);
       }
 
       updateChart(temp);
@@ -846,7 +848,7 @@ void displayTempHistoryHeading() {
 }
 
 void displayTime(float elapsedTime) {
-  String timeString = calcTimeToDisplay(elapsedTime); //HERE
+  String timeString = calcTimeToDisplay(elapsedTime);
 
   tft.fillRect(0, 160, 240, elapsedTimeSize * pixelMultiplier, ILI9341_BLACK);
   tft.setCursor(0, 160);
@@ -898,7 +900,7 @@ void updateChart(float temp) {
 
   tft.fillRect(0, 220, 240, 120, ILI9341_BLACK);
 
-  //HERE. Need to iterate on the QueueArray for displaying on the screen
+  //Iterate on the QueueArray for displaying on the screen
   if (tempGraphArray.count()  > 22) {
     arrayLength = 22;
   } else {
