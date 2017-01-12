@@ -38,8 +38,8 @@ const uint8_t pixelMultiplier = 7; //Used to clear text portions of the screen
 
 //QueueArray for the last 22 temperature readings for the TFT Graph
 QueueArray<int> tempGraphArray;
-const uint8_t lowTemp = 65;
-const uint8_t highTemp = 165;
+const uint8_t lowTemp = 70;
+const uint8_t highTemp = 220;
 
 //Brew Stage Variables
 bool isActive = false;
@@ -692,7 +692,9 @@ void loop() {
         printReading(previousTemp);
       }
 
-      updateChart(temp);
+      if (temp != 0) {
+        updateChart(temp);
+      }
     }
 
     if((currentMillis % 1000L) == 0) {
@@ -830,7 +832,7 @@ void displayStageName(String stagename) {
 }
 
 void displayTimeHeading() {
-  tft.setCursor(0, 140);
+  tft.setCursor(0, 120);
   tft.setTextSize(2);
   tft.println("Elapsed Time");
 }
@@ -842,7 +844,7 @@ void displayTempHeading() {
 }
 
 void displayTempHistoryHeading() {
-  tft.setCursor(0, 200);
+  tft.setCursor(0, 170);
   tft.setTextSize(2);
   tft.println("Temp History");
 }
@@ -850,8 +852,8 @@ void displayTempHistoryHeading() {
 void displayTime(float elapsedTime) {
   String timeString = calcTimeToDisplay(elapsedTime);
 
-  tft.fillRect(0, 160, 240, elapsedTimeSize * pixelMultiplier, ILI9341_BLACK);
-  tft.setCursor(0, 160);
+  tft.fillRect(0, 140, 240, elapsedTimeSize * pixelMultiplier, ILI9341_BLACK);
+  tft.setCursor(0, 140);
   tft.setTextSize(elapsedTimeSize);
   tft.println(timeString);
 }
@@ -898,7 +900,7 @@ void updateChart(float temp) {
   }
   tempGraphArray.enqueue(yLocation);
 
-  tft.fillRect(0, 220, 240, 120, ILI9341_BLACK);
+  tft.fillRect(0, 190, 240, 150, ILI9341_BLACK);
 
   //Iterate on the QueueArray for displaying on the screen
   if (tempGraphArray.count()  > 22) {
