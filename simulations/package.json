@@ -1,0 +1,14 @@
+{
+  "name": "brew-buddy-simulations",
+  "version": "0.0.1",
+  "description": "Simulation utility for testing the Brew Buddy App",
+  "main": "run.js",
+  "scripts": {
+    "test": "npm test"
+  },
+  "author": "Brandon Satrom <bsatrom@gmail.com>",
+  "license": "MIT",
+  "dependencies": {
+    "request": "^2.79.0"
+  }
+}
