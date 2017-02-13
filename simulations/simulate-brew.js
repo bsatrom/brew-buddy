@@ -24,6 +24,8 @@ const initSim = (Simulation) => {
 };
 
 const runSim = () => {
+  simStatus = simState[2];
+  
   simulationInterval = setInterval( () => {
     if (simDuration < simulationArgs.maxDuration) {
       console.log(`Running: ${simDuration / 1000} seconds`);
@@ -45,7 +47,6 @@ const runSim = () => {
       });
       
       simDuration += simulationArgs.interval;
-      simStatus = simState[2];
     } else {
       console.log(`Simulation complete. Total time: ${simDuration / 1000} seconds`);
       reportOnSim();
