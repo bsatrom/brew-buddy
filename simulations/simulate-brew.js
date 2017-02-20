@@ -1,5 +1,6 @@
 var Simulation = require('./Simulation');
 var request = require('request');
+var TempSimulator = require('./tempSimulator');
 
 var simulationInterval;
 var simulationArgs;
@@ -18,6 +19,8 @@ var simStatus = simState[0];
 const initSim = (Simulation) => {
   simulationArgs = Simulation;
 
+  TempSimulator.init('linear', simulationArgs);
+
   console.log(`Simulation Initialized with args: ${JSON.stringify(simulationArgs)}`);
 
   simStatus = simState[1];
@@ -27,10 +30,13 @@ const runSim = () => {
   simStatus = simState[2];
   
   simulationInterval = setInterval( () => {
-    if (simDuration < simulationArgs.maxDuration) {
+    if (simDuration <= simulationArgs.totalDuration) {
       console.log(`Running: ${simDuration / 1000} seconds`);
 
-      simulationArgs.api.payload.temperature = 100;
+      simulationArgs.api.payload.temperature = TempSimulator.getTemp(simDuration);
+
+      console.log(simulationArgs.api.payload.temperature);
+
       simulationArgs.api.payload.date_created = new Date();
 
       request.post({

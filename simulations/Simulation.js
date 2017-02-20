@@ -15,7 +15,8 @@ var sim = {
   lowTemp: 70,
   highTemp: 155,
   interval: 5000,
-  maxDuration: 20000
+  totalDuration: 20000,
+  strategy: "linear"
 };
 
 module.exports = sim
