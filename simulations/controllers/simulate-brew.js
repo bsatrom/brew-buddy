@@ -1,6 +1,9 @@
-var Simulation = require('./Simulation');
-var request = require('request');
-var TempSimulator = require('./tempSimulator');
+const request = require('request');
+const Joi = require('joi');
+
+const Simulation = require('../config/Simulation');
+const TempSimulator = require('../simulators/tempSimulator');
+const OptionsSchema = require('../models/options-schema');
 
 var simulationInterval;
 var simulationArgs;
@@ -17,9 +20,13 @@ var simState = [
 var simStatus = simState[0];
 
 const initSim = (Simulation) => {
+  const result = Joi.validate(Simulation, OptionsSchema);
+  if (result.error) {
+    throw new Error(`Simulation options error ${result.error}`);
+  }
+  
   simulationArgs = Simulation;
-
-  TempSimulator.init('linear', simulationArgs);
+  TempSimulator.init(simulationArgs);
 
   console.log(`Simulation Initialized with args: ${JSON.stringify(simulationArgs)}`);
 

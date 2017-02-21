@@ -1,5 +1,5 @@
-var Simulator = require('./simulate-brew');
-var Simulation = require('./Simulation');
+var Simulator = require('./controllers/simulate-brew');
+var Simulation = require('./config/Simulation');
 
 Simulator.init(Simulation);
 console.log(Simulator.status());

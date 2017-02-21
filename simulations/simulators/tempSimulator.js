@@ -1,11 +1,17 @@
 var simStrategy, lowTemp, highTemp, interval, totalDuration;
 
-const simulateLinear = (currentDuration) => {
+const simulateLinearIncreasing = (currentDuration) => {
   const tempRange = highTemp - lowTemp;
   const percentageComplete = currentDuration / totalDuration;
   
-  return (tempRange * percentageComplete) + lowTemp
-;
+  return (tempRange * percentageComplete) + lowTemp;
+};
+
+const simulateLinearDecreasing = (currentDuration) => {
+  const tempRange = highTemp - lowTemp;
+  const percentageComplete = currentDuration / totalDuration;
+  
+  return highTemp - (tempRange * percentageComplete);
 };
 
 const simulateRandom = (currentDuration) => {
@@ -13,12 +19,13 @@ const simulateRandom = (currentDuration) => {
 }
 
 const simulationStrategies = {
-  'linear': simulateLinear,
+  'linear-increasing': simulateLinearIncreasing,
+  'linear-decreasing': simulateLinearDecreasing,
   'random': simulateRandom
 };
 
-const initSimulator = (strategy, opts) => {
-  simStrategy = strategy;
+const initSimulator = (opts) => {
+  simStrategy = opts.strategy;
 
   lowTemp = opts.lowTemp;
   highTemp = opts.highTemp;

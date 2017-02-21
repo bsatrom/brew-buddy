@@ -9,6 +9,7 @@
   "author": "Brandon Satrom <bsatrom@gmail.com>",
   "license": "MIT",
   "dependencies": {
+    "joi": "^10.2.2",
     "request": "^2.79.0"
   }
 }
