@@ -33,10 +33,10 @@ void updateChart(float temp);
 #define APP_VERSION "v1.0"
 
 // Thermocouple Variables
-const uint8_t CHIP_SELECT_PIN = D3;
-// SCK, MISO & MOSI are defined by Spark on A3-A5
-const uint8_t VCC = D1;
-const uint8_t GND = D2;
+const uint8_t CHIP_SELECT_PIN = D4;
+// SCK, MISO & MOSI are defined on Particle 3rd Gen HW at A6-A8
+const uint8_t VCC = D2;
+const uint8_t GND = D3;
 // Instantiate an instance of the SparkFunMAX31855k class
 SparkFunMAX31855k probe(CHIP_SELECT_PIN, VCC, GND);
 
@@ -72,8 +72,6 @@ String brewId;
 void setup()
 {
   Serial.begin(9600);
-  while (!Serial)
-    ;
 
   //Particle Variables
   Particle.variable("brewStage", brewStage);
@@ -91,7 +89,8 @@ void setup()
 
   printSubheadingLine("Waiting for Brew...");
 
-  Particle.publish("Status", "Ready");
+  Particle.publish("Version", APP_VERSION);
+  Particle.publish("Status", "Brew Buddy Online");
 }
 
 void loop()
