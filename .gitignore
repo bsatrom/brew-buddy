@@ -4,6 +4,7 @@ target/
 *.job
 *.b#*
 *.s#*
+lib/
 
 # Compiled Object files
 *.slo

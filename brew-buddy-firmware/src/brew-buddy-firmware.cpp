@@ -1,3 +1,5 @@
+#include "application.h"
+#line 1 "/Users/bsatrom/Development/brew-buddy/brew-buddy-firmware/src/brew-buddy-firmware.ino"
 #include "math.h"
 #include "QueueArray.h"
 #include "beerBitmap.h"
@@ -9,6 +11,25 @@
 #include "Adafruit_ILI9341.h"
 
 // App Version Constant
+void setup();
+void loop();
+void activateBrewStage();
+int toggleBrewStage(String command);
+void printSplash();
+void clearScreen();
+void printHeadingTextLine(String text);
+void printSubheadingLine(String text);
+float readTemp();
+void postTemp(float temp);
+void printReading(float reading);
+void displayStageName(String stagename);
+void displayTimeHeading();
+void displayTempHeading();
+void displayTempHistoryHeading();
+void displayTime(float elapsedTime);
+String calcTimeToDisplay(float elapsedTime);
+void updateChart(float temp);
+#line 12 "/Users/bsatrom/Development/brew-buddy/brew-buddy-firmware/src/brew-buddy-firmware.ino"
 #define APP_VERSION "v1.0"
 
 // Thermocouple Variables
