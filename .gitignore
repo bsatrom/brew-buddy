@@ -5,6 +5,7 @@ target/
 *.b#*
 *.s#*
 lib/
+modules/
 
 # Compiled Object files
 *.slo

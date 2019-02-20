@@ -9,6 +9,10 @@
 
 // TFT Includes
 #include "Adafruit_ILI9341.h"
+#include "Adafruit_ImageReader.h"
+
+// Include for SD Card reader on TFT
+#include "SdFat.h"
 
 // App Version Constant
 void setup();
@@ -29,20 +33,37 @@ void displayTempHistoryHeading();
 void displayTime(float elapsedTime);
 String calcTimeToDisplay(float elapsedTime);
 void updateChart(float temp);
-#line 12 "/Users/bsatrom/Development/brew-buddy/brew-buddy-firmware/src/brew-buddy-firmware.ino"
+#line 16 "/Users/bsatrom/Development/brew-buddy/brew-buddy-firmware/src/brew-buddy-firmware.ino"
 #define APP_VERSION "v1.0"
 
 // Thermocouple Variables
 const uint8_t CHIP_SELECT_PIN = D4;
 // SCK, MISO & MOSI are defined on Particle 3rd Gen HW at A6-A8
-const uint8_t VCC = D2;
+const uint8_t VCC = D5;
 const uint8_t GND = D3;
 // Instantiate an instance of the SparkFunMAX31855k class
 SparkFunMAX31855k probe(CHIP_SELECT_PIN, VCC, GND);
 
+// CS Pin for SD Card on TFT
+#define SD_CS D2
+#define TFT_CS A2
+#define TFT_DC A1
+#define TFT_RST A0
 // Use hardware SPI
 // cs = A2, dc = A1, rst = A0
-Adafruit_ILI9341 tft = Adafruit_ILI9341(A2, A1, A0);
+Adafruit_ILI9341 tft = Adafruit_ILI9341(TFT_CS, TFT_DC, TFT_RST);
+Adafruit_ImageReader reader; // Class w/image-reading functions
+Adafruit_Image img;          // An image loaded into RAM
+int32_t width = 0,           // BMP image dimensions
+    height = 0;
+
+// SD Card
+SdFat sd;
+
+// #include "bmpDraw.h"
+
+// Knock sensor pin
+const uint8_t KNOCK_PIN = A4;
 
 // Timing Variables
 unsigned long previousTempMillis = 0;
@@ -65,6 +86,7 @@ const uint8_t highTemp = 220;
 
 //Brew Stage Variables
 bool isActive = false;
+bool isFermenting = false;
 
 String brewStage;
 String brewId;
@@ -72,6 +94,8 @@ String brewId;
 void setup()
 {
   Serial.begin(9600);
+
+  pinMode(KNOCK_PIN, INPUT);
 
   //Particle Variables
   Particle.variable("brewStage", brewStage);
@@ -82,6 +106,17 @@ void setup()
 
   // Initialize TFT
   tft.begin();
+
+  Serial.print("Initializing SD card...");
+  if (!sd.begin(SD_CS))
+  {
+    sd.initErrorHalt();
+    Serial.println("failed!");
+  }
+  else
+  {
+    Serial.println("OK!");
+  }
 
   printSplash();
 
@@ -95,6 +130,20 @@ void setup()
 
 void loop()
 {
+  if (isFermenting)
+  {
+    int16_t knockVal = analogRead(KNOCK_PIN);
+
+    if (knockVal > 100)
+    {
+      Serial.printlnf("Knock Val: %d", knockVal);
+
+      printSubheadingLine("Knock detected!");
+      delay(2000);
+      printSubheadingLine("Waiting for Brew...");
+    }
+  }
+
   if (isActive)
   {
     unsigned long currentMillis = millis();
@@ -185,12 +234,15 @@ int toggleBrewStage(String command)
 
 void printSplash()
 {
+  ImageReturnCode stat;
   tft.setRotation(2);
 
   clearScreen();
 
-  tft.setCursor(0, 0);
-  tft.drawBitmap(0, 0, beerBitmap, 240, 320, ILI9341_WHITE);
+  Serial.println("Loading brew.bmp to screen...");
+  stat = reader.drawBMP("brew.bmp", tft, sd, 0, 0);
+  reader.printStatus(stat); // How'd we do?
+
   delay(3000);
 
   clearScreen();
