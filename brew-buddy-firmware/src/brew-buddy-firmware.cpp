@@ -106,6 +106,7 @@ void setup()
 
   // Initialize TFT
   tft.begin();
+  clearScreen();
 
   Serial.print("Initializing SD card...");
   if (!sd.begin(SD_CS))
@@ -243,7 +244,7 @@ void printSplash()
   stat = reader.drawBMP("brew.bmp", tft, sd, 0, 0);
   reader.printStatus(stat); // How'd we do?
 
-  delay(3000);
+  delay(2000);
 
   tft.setCursor(0, 40);
   printHeadingTextLine("BrewBuddy");
@@ -257,6 +258,7 @@ void clearScreen()
 {
   tft.fillScreen(ILI9341_BLACK);
   tft.setCursor(0, 0);
+
   tft.setTextColor(ILI9341_WHITE);
 }
 
