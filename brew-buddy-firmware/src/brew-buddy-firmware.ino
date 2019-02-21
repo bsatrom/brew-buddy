@@ -68,7 +68,7 @@ const uint8_t lowTemp = 70;
 const uint8_t highTemp = 220;
 
 //Brew Stage Variables
-bool isActive = false;
+bool isBrewing = false;
 bool isFermenting = false;
 
 String brewStage;
@@ -85,7 +85,7 @@ void setup()
   Particle.variable("brewId", brewId);
 
   //Brew Stage cloud functions
-  Particle.function("brew", toggleBrewStage);
+  Particle.function("setMode", setBrewMode);
 
   // Initialize TFT
   tft.begin(TFT_SPEED);
@@ -122,11 +122,9 @@ void loop()
 
       printSubheadingLine("Knock detected!");
       delay(2000);
-      printSubheadingLine("Waiting for Brew...");
     }
   }
-
-  if (isActive)
+  else if (isBrewing)
   {
     unsigned long currentMillis = millis();
 
@@ -172,7 +170,7 @@ void activateBrewStage()
   displayTimeHeading();
 }
 
-int toggleBrewStage(String command)
+int setBrewMode(String command)
 {
   String commands[3];
   int counter = 0;
@@ -193,17 +191,31 @@ int toggleBrewStage(String command)
   brewStage = commands[2];
   brewId = commands[1];
 
-  if (commands[0] == "start" && !isActive)
+  if (commands[0] == "brew" && !isBrewing)
   {
-    isActive = true;
+    isBrewing = true;
+    isFermenting = false;
+
     clearScreen();
     activateBrewStage();
 
     return 1;
   }
+  else if (commands[0] == "ferment")
+  {
+    isBrewing = false;
+    isFermenting = true;
+
+    printSubheadingLine("Waiting for");
+    printSubheadingLine("Fermentation to begin...");
+
+    return 1;
+  }
   else if (commands[0] == "stop")
   {
-    isActive = false;
+    isBrewing = false;
+    isFermenting = false;
+
     clearScreen();
     tft.setCursor(0, 140);
     printSubheadingLine("Waiting for Brew...");
