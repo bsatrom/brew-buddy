@@ -4,10 +4,6 @@
 # https://docs.microsoft.com/azure/devops/pipelines/languages/javascript
 
 variables:
-- name: PARTICLE_USERNAME
-  value: test@example.com
-- name: PARTICLE_PASSWORD
-  value: 1234
 - group: particle-secrets
 
 trigger:
@@ -27,5 +23,5 @@ steps:
   displayName: 'Install the Particle CLI'
 
 - script: |
-    particle login --username PARTICLE_USERNAME --password PARTICLE_PASSWORD
+    particle login --username $(PARTICLE_USERNAME) --password $(PARTICLE_PASSWORD)
   displayName: 'Login to Partcle CLI'
