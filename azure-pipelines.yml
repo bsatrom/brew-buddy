@@ -25,3 +25,7 @@ steps:
 - script: |
     particle login --username $(PARTICLE_USERNAME) --password $(PARTICLE_PASSWORD)
   displayName: 'Login to Partcle CLI'
+
+- script: |
+    particle compile argon --target 0.9.0 brew-buddy-firmware
+  displayName: 'Build Firmware'
