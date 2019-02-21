@@ -49,6 +49,9 @@ SparkFunMAX31855k probe(CHIP_SELECT_PIN, VCC, GND);
 #define TFT_CS A2
 #define TFT_DC A1
 #define TFT_RST A0
+
+#define TFT_SPEED 120000000
+
 // Use hardware SPI
 // cs = A2, dc = A1, rst = A0
 Adafruit_ILI9341 tft = Adafruit_ILI9341(TFT_CS, TFT_DC, TFT_RST);
@@ -105,7 +108,7 @@ void setup()
   Particle.function("brew", toggleBrewStage);
 
   // Initialize TFT
-  tft.begin();
+  tft.begin(TFT_SPEED);
   clearScreen();
 
   Serial.print("Initializing SD card...");
