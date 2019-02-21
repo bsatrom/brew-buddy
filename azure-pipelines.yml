@@ -3,6 +3,13 @@
 # Add steps that analyze code, save build artifacts, deploy, and more:
 # https://docs.microsoft.com/azure/devops/pipelines/languages/javascript
 
+variables:
+- name: PARTICLE_USERNAME
+  value: test@example.com
+- name: PARTICLE_PASSWORD
+  value: 1234
+- group: particle-secrets
+
 trigger:
 - master
 
@@ -12,9 +19,13 @@ pool:
 steps:
 - task: NodeTool@0
   inputs:
-    versionSpec: '8.x'
+    versionSpec: '9.x'
   displayName: 'Install Node.js'
 
 - script: |
     npm install -g particle-cli
   displayName: 'Install the Particle CLI'
+
+- script: |
+    particle login --username PARTICLE_USERNAME --password PARTICLE_PASSWORD
+  displayName: 'Login to Partcle CLI'
