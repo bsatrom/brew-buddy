@@ -137,13 +137,11 @@ void loop()
   {
     int16_t knockVal = analogRead(KNOCK_PIN);
 
-    if (knockVal > 100)
+    if (knockVal > 80)
     {
       Serial.printlnf("Knock Val: %d", knockVal);
 
-      printSubheadingLine("Knock detected!");
-      delay(2000);
-      printSubheadingLine("Waiting for Brew...");
+      printSubheadingLine("Fermentation detected!");
     }
   }
   else if (isBrewing)

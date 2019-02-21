@@ -116,12 +116,11 @@ void loop()
   {
     int16_t knockVal = analogRead(KNOCK_PIN);
 
-    if (knockVal > 100)
+    if (knockVal > 80)
     {
       Serial.printlnf("Knock Val: %d", knockVal);
 
-      printSubheadingLine("Knock detected!");
-      delay(2000);
+      printSubheadingLine("Fermentation detected!");
     }
   }
   else if (isBrewing)
@@ -206,6 +205,8 @@ int setBrewMode(String command)
     isBrewing = false;
     isFermenting = true;
 
+    clearScreen();
+    tft.setCursor(0, 140);
     printSubheadingLine("Waiting for");
     printSubheadingLine("Fermentation to begin...");
 
