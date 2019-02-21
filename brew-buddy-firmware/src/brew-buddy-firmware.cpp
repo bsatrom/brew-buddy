@@ -245,7 +245,6 @@ void printSplash()
 
   delay(3000);
 
-  clearScreen();
   tft.setCursor(0, 40);
   printHeadingTextLine("BrewBuddy");
   printHeadingTextLine(APP_VERSION);
