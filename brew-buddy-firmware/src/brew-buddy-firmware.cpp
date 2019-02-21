@@ -36,6 +36,8 @@ void updateChart(float temp);
 #line 16 "/Users/bsatrom/Development/brew-buddy/brew-buddy-firmware/src/brew-buddy-firmware.ino"
 #define APP_VERSION "v1.0"
 
+SYSTEM_THREAD(ENABLED);
+
 // Thermocouple Variables
 const uint8_t CHIP_SELECT_PIN = D4;
 // SCK, MISO & MOSI are defined on Particle 3rd Gen HW at A6-A8
@@ -49,9 +51,6 @@ SparkFunMAX31855k probe(CHIP_SELECT_PIN, VCC, GND);
 #define TFT_CS A2
 #define TFT_DC A1
 #define TFT_RST A0
-
-#define TFT_SPEED 120000000
-
 // Use hardware SPI
 // cs = A2, dc = A1, rst = A0
 Adafruit_ILI9341 tft = Adafruit_ILI9341(TFT_CS, TFT_DC, TFT_RST);
@@ -59,6 +58,8 @@ Adafruit_ImageReader reader; // Class w/image-reading functions
 Adafruit_Image img;          // An image loaded into RAM
 int32_t width = 0,           // BMP image dimensions
     height = 0;
+
+#define TFT_SPEED 120000000
 
 // SD Card
 SdFat sd;
@@ -109,7 +110,6 @@ void setup()
 
   // Initialize TFT
   tft.begin(TFT_SPEED);
-  clearScreen();
 
   Serial.print("Initializing SD card...");
   if (!sd.begin(SD_CS))
@@ -125,7 +125,6 @@ void setup()
   printSplash();
 
   tft.fillScreen(ILI9341_BLACK);
-
   printSubheadingLine("Waiting for Brew...");
 
   Particle.publish("Version", APP_VERSION);
@@ -261,7 +260,6 @@ void clearScreen()
 {
   tft.fillScreen(ILI9341_BLACK);
   tft.setCursor(0, 0);
-
   tft.setTextColor(ILI9341_WHITE);
 }
 

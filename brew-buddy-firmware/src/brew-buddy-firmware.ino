@@ -15,6 +15,8 @@
 // App Version Constant
 #define APP_VERSION "v1.0"
 
+SYSTEM_THREAD(ENABLED);
+
 // Thermocouple Variables
 const uint8_t CHIP_SELECT_PIN = D4;
 // SCK, MISO & MOSI are defined on Particle 3rd Gen HW at A6-A8
@@ -35,6 +37,8 @@ Adafruit_ImageReader reader; // Class w/image-reading functions
 Adafruit_Image img;          // An image loaded into RAM
 int32_t width = 0,           // BMP image dimensions
     height = 0;
+
+#define TFT_SPEED 120000000
 
 // SD Card
 SdFat sd;
@@ -84,7 +88,7 @@ void setup()
   Particle.function("brew", toggleBrewStage);
 
   // Initialize TFT
-  tft.begin();
+  tft.begin(TFT_SPEED);
 
   Serial.print("Initializing SD card...");
   if (!sd.begin(SD_CS))
@@ -100,7 +104,6 @@ void setup()
   printSplash();
 
   tft.fillScreen(ILI9341_BLACK);
-
   printSubheadingLine("Waiting for Brew...");
 
   Particle.publish("Version", APP_VERSION);
@@ -222,9 +225,8 @@ void printSplash()
   stat = reader.drawBMP("brew.bmp", tft, sd, 0, 0);
   reader.printStatus(stat); // How'd we do?
 
-  delay(3000);
+  delay(2000);
 
-  clearScreen();
   tft.setCursor(0, 40);
   printHeadingTextLine("BrewBuddy");
   printHeadingTextLine(APP_VERSION);
