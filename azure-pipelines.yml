@@ -35,11 +35,7 @@ steps:
   inputs:
     sourceFolder: '$(Build.SourcesDirectory)'
     contents: '**/$(BuildConfiguration)/**/?(*.bin)'
-    
-- task: PublishBuildArtifacts@1
-  inputs:
-    pathtoPublish: '$(Build.ArtifactStagingDirectory)'
-    artifactName: drop
+    targetFolder: '$(Build.ArtifactStagingDirectory)'
 
 # GitHub Release
 - task: GithubRelease@0 
