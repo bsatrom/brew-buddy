@@ -38,6 +38,4 @@ steps:
   inputs:
     gitHubConnection: bsatromBB
     repositoryName: bsatrom/brew-buddy
-    tagSource: manual
-    tag: $(Build.BuildNumber)           
     assets: $(Build.ArtifactStagingDirectory)/*.bin
