@@ -8,6 +8,7 @@ variables:
 
 trigger:
 - master
+- feature/*
 
 pool:
   vmImage: 'macOS-10.13'
@@ -32,6 +33,7 @@ steps:
 
 # GitHub Release
 - task: GithubRelease@0 
+  condition: and(succeeded(), eq(variables['Build.SourceBranch'], 'refs/heads/master'))
   displayName: 'Create GitHub Release'      
   inputs:
     githubConnection: bsatromBB
