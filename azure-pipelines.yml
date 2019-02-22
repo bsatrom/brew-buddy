@@ -36,7 +36,7 @@ steps:
   condition: and(succeeded(), eq(variables['Build.SourceBranch'], 'refs/heads/master'))
   displayName: 'Create GitHub Release'      
   inputs:
-    githubConnection: bsatromBB
+    gitHubConnection: bsatromBB
     repositoryName: bsatrom/brew-buddy
     tagSource: manual
     tag: $(Build.BuildNumber)           
