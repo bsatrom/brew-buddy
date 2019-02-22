@@ -116,16 +116,14 @@ void loop()
   {
     int16_t knockVal = analogRead(KNOCK_PIN) / 16;
 
-    if (knockVal > 10)
+    if (knockVal >= 6)
     {
       Serial.printlnf("Knock Val: %d", knockVal);
 
       printSubheadingLine("Fermentation detected!");
 
-      SleepResult result = System.sleepResult();
-      int reason = result.reason();
-      Serial.print("Sleep result: ");
-      Serial.println(reason == WAKEUP_REASON_NONE);
+      waitUntil(Particle.connected);
+      Particle.publish("fermentation-value", String(knockVal));
     }
   }
   else if (isBrewing)
@@ -215,7 +213,7 @@ int setBrewMode(String command)
     printSubheadingLine("Waiting for");
     printSubheadingLine("Fermentation to begin...");
 
-    System.sleep(KNOCK_PIN, RISING, 360);
+    System.sleep(KNOCK_PIN, CHANGE);
 
     return 1;
   }
