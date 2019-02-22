@@ -31,21 +31,9 @@ steps:
   displayName: 'Build Firmware'
 
 # GitHub Release
-# Create, edit, or delete a GitHub release.
-- task: GitHubRelease@0
+- task: GithubRelease@0 
+  displayName: 'Create GitHub Release'      
   inputs:
-    gitHubConnection: brew-buddy
-    repositoryName: brew-buddy
-    action: 'edit' # Options: create, edit, delete
-    target: '$(Build.SourceVersion)' # Required when action == Create || Action == Edit
-    tagSource: 'auto' # Required when action == Create# Options: auto, manual
-    #tag: # Required when action == Edit || Action == Delete || TagSource == Manual
-    #title: # Optional
-    #releaseNotesSource: 'file' # Optional. Options: file, input
-    #releaseNotesFile: # Optional
-    #releaseNotes: # Optional
-    assets: '$(Build.ArtifactStagingDirectory)/brewBuddy.argon.bin' # Optional
-    #assetUploadMode: 'delete' # Optional. Options: delete, replace
-    isDraft: true # Optional
-    isPreRelease: true # Optional
-    #addChangeLog: true # Optional
+    githubConnection: brew-buddy
+    repositoryName: brew-buddy           
+    assets: $(Build.ArtifactStagingDirectory)/*.bin
