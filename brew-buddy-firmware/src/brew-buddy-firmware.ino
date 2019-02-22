@@ -215,7 +215,7 @@ int setBrewMode(String command)
     printSubheadingLine("Waiting for");
     printSubheadingLine("Fermentation to begin...");
 
-    System.sleep(KNOCK_PIN, CHANGE, 360);
+    System.sleep(KNOCK_PIN, RISING, 360);
 
     return 1;
   }
