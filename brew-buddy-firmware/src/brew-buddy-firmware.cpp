@@ -99,7 +99,7 @@ void setup()
 {
   Serial.begin(9600);
 
-  pinMode(KNOCK_PIN, INPUT);
+  pinMode(KNOCK_PIN, INPUT_PULLDOWN);
 
   //Particle Variables
   Particle.variable("brewStage", brewStage);
@@ -135,13 +135,18 @@ void loop()
 {
   if (isFermenting)
   {
-    int16_t knockVal = analogRead(KNOCK_PIN);
+    int16_t knockVal = analogRead(KNOCK_PIN) / 16;
 
-    if (knockVal > 80)
+    if (knockVal > 10)
     {
       Serial.printlnf("Knock Val: %d", knockVal);
 
       printSubheadingLine("Fermentation detected!");
+
+      SleepResult result = System.sleepResult();
+      int reason = result.reason();
+      Serial.print("Sleep result: ");
+      Serial.println(reason == WAKEUP_REASON_NONE);
     }
   }
   else if (isBrewing)
@@ -226,8 +231,12 @@ int setBrewMode(String command)
     isBrewing = false;
     isFermenting = true;
 
+    clearScreen();
+    tft.setCursor(0, 140);
     printSubheadingLine("Waiting for");
     printSubheadingLine("Fermentation to begin...");
+
+    System.sleep(KNOCK_PIN, CHANGE, 360);
 
     return 1;
   }
