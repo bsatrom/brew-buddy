@@ -34,7 +34,7 @@ steps:
 # Create, edit, or delete a GitHub release.
 - task: GitHubRelease@0
   inputs:
-    gitHubConnection: bsatrom
+    gitHubConnection: brew-buddy
     repositoryName: brew-buddy
     action: 'create' # Options: create, edit, delete
     target: '$(Build.SourceVersion)' # Required when action == Create || Action == Edit
