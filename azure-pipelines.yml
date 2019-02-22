@@ -27,5 +27,5 @@ steps:
   displayName: 'Login to Partcle CLI'
 
 - script: |
-    particle compile argon --target 0.9.0 brew-buddy-firmware
+    particle compile argon --target 0.9.0 brew-buddy-firmware --saveTo brewBuddy.argon.bin
   displayName: 'Build Firmware'
