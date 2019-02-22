@@ -35,5 +35,5 @@ steps:
   displayName: 'Create GitHub Release'      
   inputs:
     githubConnection: brew-buddy
-    repositoryName: bsatrom/brew-buddy           
+    repositoryName: brew-buddy           
     assets: $(Build.ArtifactStagingDirectory)/*.bin
