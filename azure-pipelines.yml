@@ -31,6 +31,16 @@ steps:
     particle compile argon --target 0.9.0 brew-buddy-firmware --saveTo brewBuddy.argon.bin
   displayName: 'Build Firmware'
 
+- task: CopyFiles@2
+  inputs:
+    sourceFolder: '$(Build.SourcesDirectory)'
+    contents: '**/$(BuildConfiguration)/**/?(*.bin)'
+    
+- task: PublishBuildArtifacts@1
+  inputs:
+    pathtoPublish: '$(Build.ArtifactStagingDirectory)'
+    artifactName: drop
+
 # GitHub Release
 - task: GithubRelease@0 
   condition: and(succeeded(), eq(variables['Build.SourceBranch'], 'refs/heads/master'))
@@ -38,4 +48,6 @@ steps:
   inputs:
     gitHubConnection: bsatromBB
     repositoryName: bsatrom/brew-buddy
+    tagSource: manual
+    tag: $(Build.BuildNumber) 
     assets: $(Build.ArtifactStagingDirectory)/*.bin
