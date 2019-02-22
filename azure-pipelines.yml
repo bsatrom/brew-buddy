@@ -34,7 +34,7 @@ steps:
 - task: CopyFiles@2
   inputs:
     sourceFolder: '$(Build.SourcesDirectory)'
-    contents: '**/$(BuildConfiguration)/**/?(*.bin)'
+    contents: 'brewBuddy.argon.bin'
     targetFolder: '$(Build.ArtifactStagingDirectory)'
 
 # GitHub Release
