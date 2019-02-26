@@ -17,6 +17,7 @@
 // App Version Constant
 void setup();
 void loop();
+void resetFermentationVariables();
 void activateBrewStage();
 int setBrewMode(String command);
 void printSplash();
@@ -89,8 +90,18 @@ const uint8_t lowTemp = 70;
 const uint8_t highTemp = 220;
 
 //Brew Stage Variables
-bool isBrewing = false;
+bool isBrewingMode = false;
+bool isFermentationMode = false;
+
+//Variables for fermentation detection
 bool isFermenting = false;
+unsigned long fermentationModeStartTime = 0;
+unsigned long fermentationStartTime = 0;
+
+// Variables for fermentation rate
+long fermentationRate = 0; // knocks per ms
+int knocksDetected = 0;
+unsigned long lastKnock = 0;
 
 String brewStage;
 String brewId;
@@ -133,21 +144,33 @@ void setup()
 
 void loop()
 {
-  if (isFermenting)
+  if (isFermentationMode)
   {
     int16_t knockVal = analogRead(KNOCK_PIN) / 16;
 
     if (knockVal >= 6)
     {
       Serial.printlnf("Knock Val: %d", knockVal);
+      lastKnock = millis();
 
-      printSubheadingLine("Fermentation detected!");
+      if (!isFermenting)
+      {
+        isFermenting = true;
 
-      waitUntil(Particle.connected);
-      Particle.publish("fermentation-value", String(knockVal));
+        clearScreen();
+        tft.setCursor(0, 140);
+        printSubheadingLine("Fermentation started...");
+        // TODO: print delta btw mode start and fermentation start
+        waitUntil(Particle.connected);
+        Particle.publish("fermentation/state", "start");
+      }
+      else
+      {
+        // TODO: Display fermentation rate
+      }
     }
   }
-  else if (isBrewing)
+  else if (isBrewingMode)
   {
     unsigned long currentMillis = millis();
 
@@ -183,6 +206,15 @@ void loop()
   }
 }
 
+void resetFermentationVariables()
+{
+  isFermenting = false;
+  fermentationModeStartTime = 0;
+  fermentationStartTime = 0;
+  fermentationRate = 0;
+  lastKnock = 0;
+}
+
 void activateBrewStage()
 {
   startTime = millis();
@@ -214,10 +246,10 @@ int setBrewMode(String command)
   brewStage = commands[2];
   brewId = commands[1];
 
-  if (commands[0] == "brew" && !isBrewing)
+  if (commands[0] == "brew" && !isBrewingMode)
   {
-    isBrewing = true;
-    isFermenting = false;
+    isBrewingMode = true;
+    isFermentationMode = false;
 
     clearScreen();
     activateBrewStage();
@@ -226,8 +258,9 @@ int setBrewMode(String command)
   }
   else if (commands[0] == "ferment")
   {
-    isBrewing = false;
-    isFermenting = true;
+    isBrewingMode = false;
+    isFermentationMode = true;
+    fermentationModeStartTime = millis();
 
     clearScreen();
     tft.setCursor(0, 140);
@@ -240,8 +273,9 @@ int setBrewMode(String command)
   }
   else if (commands[0] == "stop")
   {
-    isBrewing = false;
-    isFermenting = false;
+    isBrewingMode = false;
+    isFermentationMode = false;
+    resetFermentationVariables();
 
     clearScreen();
     tft.setCursor(0, 140);
