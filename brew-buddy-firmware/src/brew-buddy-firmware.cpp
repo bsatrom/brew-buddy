@@ -17,6 +17,8 @@
 // App Version Constant
 void setup();
 void loop();
+void resetFermentationVariables();
+long getFermentationRate();
 void activateBrewStage();
 int setBrewMode(String command);
 void printSplash();
@@ -27,9 +29,11 @@ float readTemp();
 void postTemp(float temp);
 void printReading(float reading);
 void displayStageName(String stagename);
+void displayFermentationHeading();
 void displayTimeHeading();
 void displayTempHeading();
 void displayTempHistoryHeading();
+void displayFermentationRate(long rate);
 void displayTime(float elapsedTime);
 String calcTimeToDisplay(float elapsedTime);
 void updateChart(float temp);
@@ -81,6 +85,7 @@ const uint8_t headingTextSize = 4;
 const uint8_t subheadTextSize = 2;
 const uint8_t tempTextSize = 5;
 const uint8_t elapsedTimeSize = 3;
+const uint8_t fermentationRateSize = 5;
 const uint8_t pixelMultiplier = 7; //Used to clear text portions of the screen
 
 //QueueArray for the last 22 temperature readings for the TFT Graph
@@ -89,8 +94,18 @@ const uint8_t lowTemp = 70;
 const uint8_t highTemp = 220;
 
 //Brew Stage Variables
-bool isBrewing = false;
+bool isBrewingMode = false;
+bool isFermentationMode = false;
+
+//Variables for fermentation detection
 bool isFermenting = false;
+unsigned long fermentationModeStartTime = 0;
+unsigned long fermentationStartTime = 0;
+
+// Variables for fermentation rate
+QueueArray<long> knockArray;
+long fermentationRate = 0; // knocks per ms
+unsigned long lastKnock;
 
 String brewStage;
 String brewId;
@@ -133,7 +148,7 @@ void setup()
 
 void loop()
 {
-  if (isFermenting)
+  if (isFermentationMode)
   {
     int16_t knockVal = analogRead(KNOCK_PIN) / 16;
 
@@ -141,13 +156,36 @@ void loop()
     {
       Serial.printlnf("Knock Val: %d", knockVal);
 
-      printSubheadingLine("Fermentation detected!");
+      if (!isFermenting)
+      {
+        isFermenting = true;
+        fermentationStartTime = millis();
+        lastKnock = fermentationStartTime;
 
-      waitUntil(Particle.connected);
-      Particle.publish("fermentation-value", String(knockVal));
+        clearScreen();
+        tft.setCursor(0, 10);
+        tft.setTextColor(ILI9341_YELLOW);
+        tft.setTextSize(2);
+        tft.print("Fermentation started");
+        tft.setTextColor(ILI9341_WHITE);
+
+        displayFermentationHeading();
+        // TODO: print delta btw mode start and fermentation start
+
+        waitUntil(Particle.connected);
+        Particle.publish("fermentation/state", "start");
+      }
+      else
+      {
+        knockArray.push(millis() - lastKnock);
+        lastKnock = millis();
+        fermentationRate = getFermentationRate() / 1000.00; // # of ms between knocks
+
+        displayFermentationRate(fermentationRate);
+      }
     }
   }
-  else if (isBrewing)
+  else if (isBrewingMode)
   {
     unsigned long currentMillis = millis();
 
@@ -183,6 +221,32 @@ void loop()
   }
 }
 
+void resetFermentationVariables()
+{
+  isFermenting = false;
+  fermentationModeStartTime = 0;
+  fermentationStartTime = 0;
+  fermentationRate = 0;
+}
+
+long getFermentationRate()
+{
+  long rate = 0.0;
+  uint16_t arrayCount = knockArray.count();
+  uint16_t sum = 0;
+
+  for (int i = 0; i < arrayCount; i++)
+  {
+    uint16_t currentVal = knockArray.dequeue();
+    sum += currentVal;
+    knockArray.enqueue(currentVal);
+  }
+
+  rate = sum / arrayCount;
+
+  return rate;
+}
+
 void activateBrewStage()
 {
   startTime = millis();
@@ -214,10 +278,10 @@ int setBrewMode(String command)
   brewStage = commands[2];
   brewId = commands[1];
 
-  if (commands[0] == "brew" && !isBrewing)
+  if (commands[0] == "brew" && !isBrewingMode)
   {
-    isBrewing = true;
-    isFermenting = false;
+    isBrewingMode = true;
+    isFermentationMode = false;
 
     clearScreen();
     activateBrewStage();
@@ -226,13 +290,14 @@ int setBrewMode(String command)
   }
   else if (commands[0] == "ferment")
   {
-    isBrewing = false;
-    isFermenting = true;
+    isBrewingMode = false;
+    isFermentationMode = true;
+    fermentationModeStartTime = millis();
 
     clearScreen();
     tft.setCursor(0, 140);
     printSubheadingLine("Waiting for");
-    printSubheadingLine("Fermentation to begin...");
+    printSubheadingLine("Fermentation...");
 
     System.sleep(KNOCK_PIN, CHANGE);
 
@@ -240,8 +305,9 @@ int setBrewMode(String command)
   }
   else if (commands[0] == "stop")
   {
-    isBrewing = false;
-    isFermenting = false;
+    isBrewingMode = false;
+    isFermentationMode = false;
+    resetFermentationVariables();
 
     clearScreen();
     tft.setCursor(0, 140);
@@ -350,6 +416,14 @@ void displayStageName(String stagename)
   tft.setTextColor(ILI9341_WHITE);
 }
 
+void displayFermentationHeading()
+{
+  tft.setCursor(0, 40);
+  tft.setTextSize(2);
+  tft.println("Fermentation Rate");
+  tft.println("(in seconds)");
+}
+
 void displayTimeHeading()
 {
   tft.setCursor(0, 120);
@@ -369,6 +443,14 @@ void displayTempHistoryHeading()
   tft.setCursor(0, 170);
   tft.setTextSize(2);
   tft.println("Temp History");
+}
+
+void displayFermentationRate(long rate)
+{
+  tft.fillRect(0, 80, 240, fermentationRateSize * pixelMultiplier, ILI9341_BLACK);
+  tft.setCursor(0, 80);
+  tft.setTextSize(fermentationRateSize);
+  tft.println(rate);
 }
 
 void displayTime(float elapsedTime)
