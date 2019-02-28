@@ -27,6 +27,7 @@ void printHeadingTextLine(String text);
 void printSubheadingLine(String text);
 float readTemp();
 void postTemp(float temp);
+void postFermentationRate();
 void printReading(float reading);
 void displayStageName(String stagename);
 void displayFermentationHeading();
@@ -80,6 +81,10 @@ unsigned long startTime = 0;
 unsigned long elapsedTime;
 float previousTemp = 0;
 
+// Timing variables for posting readings to the cloud
+unsigned long postInterval = 120000;
+unsigned long previousPostMillis = 0;
+
 //Text Size Variables
 const uint8_t headingTextSize = 4;
 const uint8_t subheadTextSize = 2;
@@ -92,6 +97,7 @@ const uint8_t pixelMultiplier = 7; //Used to clear text portions of the screen
 QueueArray<int> tempGraphArray;
 const uint8_t lowTemp = 70;
 const uint8_t highTemp = 220;
+float lastTemp = 0.0;
 
 //Brew Stage Variables
 bool isBrewingMode = false;
@@ -104,7 +110,7 @@ unsigned long fermentationStartTime = 0;
 
 // Variables for fermentation rate
 QueueArray<long> knockArray;
-long fermentationRate = 0; // knocks per ms
+float fermentationRate = 0; // knocks per ms
 unsigned long lastKnock;
 
 String brewStage;
@@ -217,6 +223,13 @@ void loop()
       elapsedTime = currentMillis - startTime;
 
       displayTime(elapsedTime);
+    }
+
+    if (currentMillis - previousPostMillis > postInterval)
+    {
+      // Post curent values to the Device Cloud
+      postTemp(lastTemp);
+      postFermentationRate();
     }
   }
 }
@@ -365,7 +378,7 @@ float readTemp()
 
   if (!isnan(temperature))
   {
-    postTemp(temperature);
+    lastTemp = temperature;
 
     return temperature;
   }
@@ -380,6 +393,12 @@ void postTemp(float temp)
 {
   String payload = "{ \"a\":" + String(temp, 2) + ", \"b\": \"" + brewId + "\", \"c\": \"" + brewStage + "\" }";
   Particle.publish("BrewStageTemp", payload);
+}
+
+void postFermentationRate()
+{
+  String payload = "{ \"current_rate\":" + String(fermentationRate, 2) + "\" }";
+  Particle.publish("fermentation/rate", payload);
 }
 
 void printReading(float reading)
