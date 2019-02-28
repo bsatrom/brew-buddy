@@ -227,9 +227,16 @@ void loop()
 
     if (currentMillis - previousPostMillis > postInterval)
     {
-      // Post curent values to the Device Cloud
-      postTemp(lastTemp);
-      postFermentationRate();
+      previousPostMillis = millis();
+
+      if (isBrewingMode)
+      {
+        postTemp(lastTemp);
+      }
+      else if (isFermentationMode)
+      {
+        postFermentationRate();
+      }
     }
   }
 }
@@ -391,13 +398,13 @@ float readTemp()
 
 void postTemp(float temp)
 {
-  String payload = "{ \"a\":" + String(temp, 2) + ", \"b\": \"" + brewId + "\", \"c\": \"" + brewStage + "\" }";
-  Particle.publish("BrewStageTemp", payload);
+  String payload = "{ \"temperature\":" + String(temp, 2) + ", \"time\": \"" + millis() + "\" }";
+  Particle.publish("brewing/temp", payload);
 }
 
 void postFermentationRate()
 {
-  String payload = "{ \"current_rate\":" + String(fermentationRate, 2) + "\" }";
+  String payload = "{ \"current_rate\":" + String(fermentationRate, 2) + ", \"time\": \"" + millis() + "\" }";
   Particle.publish("fermentation/rate", payload);
 }
 
