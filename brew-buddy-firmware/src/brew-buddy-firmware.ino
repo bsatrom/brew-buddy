@@ -87,6 +87,8 @@ QueueArray<long> knockArray;
 float fermentationRate = 0; // knocks per ms
 unsigned long lastKnock;
 
+String messageBase = "bb/";
+
 String brewStage;
 String brewId;
 
@@ -153,7 +155,7 @@ void loop()
         displayFermentationModeDelta();
 
         waitUntil(Particle.connected);
-        Particle.publish("fermentation/state", "start");
+        Particle.publish(messageBase + "ferment/state", "start");
       }
       else
       {
@@ -373,13 +375,13 @@ float readTemp()
 void postTemp(float temp)
 {
   String payload = "{ \"temperature\":" + String(temp, 2) + ", \"time\": \"" + millis() + "\" }";
-  Particle.publish("brewing/temp", payload);
+  Particle.publish(messageBase + "brew/temp", payload);
 }
 
 void postFermentationRate()
 {
   String payload = "{ \"current_rate\":" + String(fermentationRate, 2) + ", \"time\": \"" + millis() + "\" }";
-  Particle.publish("fermentation/rate", payload);
+  Particle.publish(messageBase + "ferment/rate", payload);
 }
 
 void printReading(float reading)
