@@ -150,7 +150,7 @@ void loop()
         tft.setTextColor(ILI9341_WHITE);
 
         displayFermentationHeading();
-        // TODO: print delta btw mode start and fermentation start
+        displayFermentationModeDelta();
 
         waitUntil(Particle.connected);
         Particle.publish("fermentation/state", "start");
@@ -418,10 +418,20 @@ void displayStageName(String stagename)
 
 void displayFermentationHeading()
 {
-  tft.setCursor(0, 40);
+  tft.setCursor(0, 100);
   tft.setTextSize(2);
   tft.println("Fermentation Rate");
   tft.println("(in seconds)");
+}
+
+void displayFermentationModeDelta()
+{
+  unsigned long fermentationDelta = fermentationStartTime - fermentationModeStartTime;
+
+  tft.setCursor(0, 40);
+  tft.setTextSize(2);
+  tft.println("Time to fermentation (hours)");
+  tft.println(fermentationDelta / 36000000.00);
 }
 
 void displayTimeHeading()
