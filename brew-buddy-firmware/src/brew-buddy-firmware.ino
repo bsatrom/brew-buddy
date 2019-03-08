@@ -104,6 +104,8 @@ void setup()
 
   //Brew Stage cloud functions
   Particle.function("setMode", setBrewMode);
+  Particle.function("checkTemp", checkTemp);
+  Particle.function("checkRate", checkFermentationRate);
 
   // Initialize TFT
   tft.begin(TFT_SPEED);
@@ -243,6 +245,31 @@ long getFermentationRate()
   return rate;
 }
 
+int checkFermentationRate(String args)
+{
+  if (isFermentationMode)
+  {
+    postFermentationRate();
+
+    return 1;
+  }
+
+  return 0;
+}
+
+int checkTemp(String args)
+{
+  if (isBrewingMode)
+  {
+    float temp = readTemp();
+    postTemp(temp);
+
+    return 1;
+  }
+
+  return 0;
+}
+
 void activateBrewStage()
 {
   startTime = millis();
@@ -374,14 +401,12 @@ float readTemp()
 
 void postTemp(float temp)
 {
-  String payload = "{ \"temperature\":" + String(temp, 2) + ", \"time\": \"" + millis() + "\" }";
-  Particle.publish(messageBase + "brew/temp", payload);
+  Particle.publish(messageBase + "brew/temp", String(temp, 2));
 }
 
 void postFermentationRate()
 {
-  String payload = "{ \"current_rate\":" + String(fermentationRate, 2) + ", \"time\": \"" + millis() + "\" }";
-  Particle.publish(messageBase + "ferment/rate", payload);
+  Particle.publish(messageBase + "ferment/rate", String(fermentationRate, 2));
 }
 
 void printReading(float reading)
