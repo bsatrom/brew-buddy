@@ -14,11 +14,17 @@
 // Include for SD Card reader on TFT
 #include "SdFat.h"
 
+// Include MQTT Library to enable the Azure IoT Hub to call back to our device
+#include "MQTT.h"
+
 // App Version Constant
 void setup();
 void loop();
 void resetFermentationVariables();
 long getFermentationRate();
+int checkFermentationRate(String args);
+int checkTemp(String args);
+int checkVoltage();
 void activateBrewStage();
 int setBrewMode(String command);
 void printSplash();
@@ -31,14 +37,17 @@ void postFermentationRate();
 void printReading(float reading);
 void displayStageName(String stagename);
 void displayFermentationHeading();
+void displayFermentationModeDelta();
 void displayTimeHeading();
 void displayTempHeading();
 void displayTempHistoryHeading();
 void displayFermentationRate(long rate);
 void displayTime(float elapsedTime);
+void displayVoltage(int voltage);
+void displayLowBattAlert();
 String calcTimeToDisplay(float elapsedTime);
 void updateChart(float temp);
-#line 16 "/Users/bsatrom/Development/brew-buddy/brew-buddy-firmware/src/brew-buddy-firmware.ino"
+#line 19 "/Users/bsatrom/Development/brew-buddy/brew-buddy-firmware/src/brew-buddy-firmware.ino"
 #define APP_VERSION "v1.0"
 
 SYSTEM_THREAD(ENABLED);
@@ -65,6 +74,7 @@ int32_t width = 0,           // BMP image dimensions
     height = 0;
 
 #define TFT_SPEED 120000000
+#define BATT_LOW_VOLTAGE 90
 
 // SD Card
 SdFat sd;
@@ -84,6 +94,10 @@ float previousTemp = 0;
 // Timing variables for posting readings to the cloud
 unsigned long postInterval = 120000;
 unsigned long previousPostMillis = 0;
+
+// Timing variables for checking the battery state
+unsigned long battInterval = 300000;
+unsigned long previousBattMillis = 0;
 
 //Text Size Variables
 const uint8_t headingTextSize = 4;
@@ -113,8 +127,14 @@ QueueArray<long> knockArray;
 float fermentationRate = 0; // knocks per ms
 unsigned long lastKnock;
 
+String messageBase = "bb/";
+
 String brewStage;
 String brewId;
+
+// MQTT Callback fw declaration and client
+void mqttCB(char *topic, byte *payload, unsigned int length);
+MQTT client("brew-buddy-hub.azure-devices.net", 8883, mqttCB);
 
 void setup()
 {
@@ -128,6 +148,8 @@ void setup()
 
   //Brew Stage cloud functions
   Particle.function("setMode", setBrewMode);
+  Particle.function("checkTemp", checkTemp);
+  Particle.function("checkRate", checkFermentationRate);
 
   // Initialize TFT
   tft.begin(TFT_SPEED);
@@ -148,12 +170,29 @@ void setup()
   tft.fillScreen(ILI9341_BLACK);
   printSubheadingLine("Waiting for Brew...");
 
+  // Check and display the battery level
+  int voltage = checkVoltage();
+  displayVoltage(voltage);
+
+  //Connect to Azure MQTT Server
+  /* client.connect("e00fce681290df8ab5487791", "brew-buddy-hub.azure-devices.net/e00fce681290df8ab5487791/?api-version=2018-06-30", "SharedAccessSignature sr=brew-buddy-hub.azure-devices.net&sig=RKWH%2FV8CD595YeAnXOZ8jXsSYMnWf6RiJBnzhUoxCzE%3D&skn=iothubowner&se=1552683541");
+  if (client.isConnected())
+  {
+    Particle.publish("mqtt/status", "connected");
+  }
+  else
+  {
+    Particle.publish("mqtt/status", "failed");
+  } */
+
   Particle.publish("Version", APP_VERSION);
   Particle.publish("Status", "Brew Buddy Online");
 }
 
 void loop()
 {
+  unsigned long currentMillis = millis();
+
   if (isFermentationMode)
   {
     int16_t knockVal = analogRead(KNOCK_PIN) / 16;
@@ -176,10 +215,10 @@ void loop()
         tft.setTextColor(ILI9341_WHITE);
 
         displayFermentationHeading();
-        // TODO: print delta btw mode start and fermentation start
+        displayFermentationModeDelta();
 
         waitUntil(Particle.connected);
-        Particle.publish("fermentation/state", "start");
+        Particle.publish(messageBase + "ferment/state", "start");
       }
       else
       {
@@ -193,8 +232,6 @@ void loop()
   }
   else if (isBrewingMode)
   {
-    unsigned long currentMillis = millis();
-
     if (currentMillis - previousTempMillis > tempInterval)
     {
       previousTempMillis = currentMillis;
@@ -224,19 +261,34 @@ void loop()
 
       displayTime(elapsedTime);
     }
+  }
 
-    if (currentMillis - previousPostMillis > postInterval)
+  if (currentMillis - previousBattMillis > battInterval)
+  {
+    int voltage = checkVoltage();
+
+    displayVoltage(voltage);
+    Particle.publish(messageBase + "voltage", String(voltage));
+
+    // If voltage < 30%, show a low batt message and publish message to cloud
+    if (voltage < BATT_LOW_VOLTAGE)
     {
-      previousPostMillis = millis();
+      displayLowBattAlert();
+      Particle.publish(messageBase + "alert", "low-batt");
+    }
+  }
 
-      if (isBrewingMode)
-      {
-        postTemp(lastTemp);
-      }
-      else if (isFermentationMode)
-      {
-        postFermentationRate();
-      }
+  if (currentMillis - previousPostMillis > postInterval)
+  {
+    previousPostMillis = millis();
+
+    if (isBrewingMode)
+    {
+      postTemp(lastTemp);
+    }
+    else if (isFermentationMode)
+    {
+      postFermentationRate();
     }
   }
 }
@@ -265,6 +317,38 @@ long getFermentationRate()
   rate = sum / arrayCount;
 
   return rate;
+}
+
+int checkFermentationRate(String args)
+{
+  if (isFermentationMode)
+  {
+    postFermentationRate();
+
+    return 1;
+  }
+
+  return 0;
+}
+
+int checkTemp(String args)
+{
+  if (isBrewingMode)
+  {
+    float temp = readTemp();
+    postTemp(temp);
+
+    return 1;
+  }
+
+  return 0;
+}
+
+int checkVoltage()
+{
+  int voltage = analogRead(BATT) * 0.0011224;
+
+  return (int)((voltage / 4.2) * 100 + 0.5)
 }
 
 void activateBrewStage()
@@ -398,14 +482,12 @@ float readTemp()
 
 void postTemp(float temp)
 {
-  String payload = "{ \"temperature\":" + String(temp, 2) + ", \"time\": \"" + millis() + "\" }";
-  Particle.publish("brewing/temp", payload);
+  Particle.publish(messageBase + "brew/temp", String(temp, 2));
 }
 
 void postFermentationRate()
 {
-  String payload = "{ \"current_rate\":" + String(fermentationRate, 2) + ", \"time\": \"" + millis() + "\" }";
-  Particle.publish("fermentation/rate", payload);
+  Particle.publish(messageBase + "ferment/rate", String(fermentationRate, 2));
 }
 
 void printReading(float reading)
@@ -423,7 +505,7 @@ void printReading(float reading)
   }
   else if (reading > 110)
   {
-    tft.setTextSize(ILI9341_RED);
+    tft.setTextColor(ILI9341_RED);
   }
 
   tft.setTextSize(tempTextSize);
@@ -444,10 +526,20 @@ void displayStageName(String stagename)
 
 void displayFermentationHeading()
 {
-  tft.setCursor(0, 40);
+  tft.setCursor(0, 100);
   tft.setTextSize(2);
   tft.println("Fermentation Rate");
   tft.println("(in seconds)");
+}
+
+void displayFermentationModeDelta()
+{
+  unsigned long fermentationDelta = fermentationStartTime - fermentationModeStartTime;
+
+  tft.setCursor(0, 40);
+  tft.setTextSize(2);
+  tft.println("Time to fermentation (hours)");
+  tft.println(fermentationDelta / 36000000.00);
 }
 
 void displayTimeHeading()
@@ -487,6 +579,23 @@ void displayTime(float elapsedTime)
   tft.setCursor(0, 140);
   tft.setTextSize(elapsedTimeSize);
   tft.println(timeString);
+}
+
+void displayVoltage(int voltage)
+{
+  tft.setCursor(160, 10);
+  tft.setTextSize(1);
+  tft.print("Batt: ");
+  tft.print(voltage);
+  tft.println("%");
+}
+
+void displayLowBattAlert()
+{
+  tft.setCursor(160, 30);
+  tft.setTextSize(2);
+  tft.setTextSize(ILI9341_RED);
+  tft.println("LOW BATT");
 }
 
 String calcTimeToDisplay(float elapsedTime)
@@ -562,4 +671,9 @@ void updateChart(float temp)
     //Queue the front value back onto the end of the array
     tempGraphArray.enqueue(currentLocation);
   }
+}
+
+void mqttCB(char *topic, byte *payload, unsigned int length)
+{
+  Particle.publish("mqtt/sub", topic);
 }
