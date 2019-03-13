@@ -118,6 +118,7 @@ void setup()
   Particle.function("setMode", setBrewMode);
   Particle.function("checkTemp", checkTemp);
   Particle.function("checkRate", checkFermentationRate);
+  Particle.function("checkBatt", checkBatterylevel);
 
   // Initialize TFT
   tft.begin(TFT_SPEED);
@@ -139,8 +140,8 @@ void setup()
   printSubheadingLine("Waiting for Brew...");
 
   // Check and display the battery level
-  int voltage = checkVoltage();
-  displayVoltage(voltage);
+  int voltage = getBatteryPercantage();
+  displayBattLevel(voltage);
 
   //Connect to Azure MQTT Server
   /* client.connect("e00fce681290df8ab5487791", "brew-buddy-hub.azure-devices.net/e00fce681290df8ab5487791/?api-version=2018-06-30", "SharedAccessSignature sr=brew-buddy-hub.azure-devices.net&sig=RKWH%2FV8CD595YeAnXOZ8jXsSYMnWf6RiJBnzhUoxCzE%3D&skn=iothubowner&se=1552683541");
@@ -233,13 +234,12 @@ void loop()
 
   if (currentMillis - previousBattMillis > battInterval)
   {
-    int voltage = checkVoltage();
+    int battLevel = getBatteryPercantage();
 
-    displayVoltage(voltage);
-    Particle.publish(messageBase + "voltage", String(voltage));
+    displayBattLevel(battLevel);
+    Particle.publish(messageBase + "batt-level", String(battLevel));
 
-    // If voltage < 30%, show a low batt message and publish message to cloud
-    if (voltage < BATT_LOW_VOLTAGE)
+    if (battLevel < BATT_LOW_VOLTAGE)
     {
       displayLowBattAlert();
       Particle.publish(messageBase + "alert", "low-batt");
@@ -287,6 +287,14 @@ long getFermentationRate()
   return rate;
 }
 
+int checkBatterylevel(String args)
+{
+  int battLevel = getBatteryPercantage();
+  Particle.publish(messageBase + "batt-level", String(battLevel));
+
+  return 1;
+}
+
 int checkFermentationRate(String args)
 {
   if (isFermentationMode)
@@ -312,7 +320,7 @@ int checkTemp(String args)
   return 0;
 }
 
-int checkVoltage()
+int getBatteryPercantage()
 {
   int voltage = analogRead(BATT) * 0.0011224;
 
@@ -409,6 +417,13 @@ void printSplash()
   printSubheadingLine("Created by");
   printSubheadingLine("Brandon Satrom");
   delay(3000);
+}
+
+void clearTopBar()
+{
+  tft.fillRect(0, 0, 240, 30, ILI9341_BLACK);
+  tft.setCursor(0, 0);
+  tft.setTextColor(ILI9341_WHITE);
 }
 
 void clearScreen()
@@ -548,8 +563,9 @@ void displayTime(float elapsedTime)
   tft.println(timeString);
 }
 
-void displayVoltage(int voltage)
+void displayBattLevel(int voltage)
 {
+  clearTopBar();
   tft.setCursor(160, 10);
   tft.setTextSize(1);
   tft.print("Batt: ");
@@ -559,7 +575,7 @@ void displayVoltage(int voltage)
 
 void displayLowBattAlert()
 {
-  tft.setCursor(160, 30);
+  tft.setCursor(10, 10);
   tft.setTextSize(2);
   tft.setTextColor(ILI9341_RED);
   tft.println("LOW BATT");
