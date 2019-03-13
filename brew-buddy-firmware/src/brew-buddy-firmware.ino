@@ -12,6 +12,9 @@
 // Include for SD Card reader on TFT
 #include "SdFat.h"
 
+// Include MQTT Library to enable the Azure IoT Hub to call back to our device
+#include "MQTT.h"
+
 // App Version Constant
 #define APP_VERSION "v1.0"
 
@@ -39,6 +42,7 @@ int32_t width = 0,           // BMP image dimensions
     height = 0;
 
 #define TFT_SPEED 120000000
+#define BATT_LOW_VOLTAGE 30
 
 // SD Card
 SdFat sd;
@@ -58,6 +62,10 @@ float previousTemp = 0;
 // Timing variables for posting readings to the cloud
 unsigned long postInterval = 120000;
 unsigned long previousPostMillis = 0;
+
+// Timing variables for checking the battery state
+unsigned long battInterval = 300000;
+unsigned long previousBattMillis = 0;
 
 //Text Size Variables
 const uint8_t headingTextSize = 4;
@@ -92,6 +100,10 @@ String messageBase = "bb/";
 String brewStage;
 String brewId;
 
+// MQTT Callback fw declaration and client
+void mqttCB(char *topic, byte *payload, unsigned int length);
+MQTT client("brew-buddy-hub.azure-devices.net", 8883, mqttCB);
+
 void setup()
 {
   Serial.begin(9600);
@@ -106,6 +118,7 @@ void setup()
   Particle.function("setMode", setBrewMode);
   Particle.function("checkTemp", checkTemp);
   Particle.function("checkRate", checkFermentationRate);
+  Particle.function("checkBatt", checkBatterylevel);
 
   // Initialize TFT
   tft.begin(TFT_SPEED);
@@ -126,12 +139,29 @@ void setup()
   tft.fillScreen(ILI9341_BLACK);
   printSubheadingLine("Waiting for Brew...");
 
+  // Check and display the battery level
+  int voltage = getBatteryPercantage();
+  displayBattLevel(voltage);
+
+  //Connect to Azure MQTT Server
+  /* client.connect("e00fce681290df8ab5487791", "brew-buddy-hub.azure-devices.net/e00fce681290df8ab5487791/?api-version=2018-06-30", "SharedAccessSignature sr=brew-buddy-hub.azure-devices.net&sig=RKWH%2FV8CD595YeAnXOZ8jXsSYMnWf6RiJBnzhUoxCzE%3D&skn=iothubowner&se=1552683541");
+  if (client.isConnected())
+  {
+    Particle.publish("mqtt/status", "connected");
+  }
+  else
+  {
+    Particle.publish("mqtt/status", "failed");
+  } */
+
   Particle.publish("Version", APP_VERSION);
   Particle.publish("Status", "Brew Buddy Online");
 }
 
 void loop()
 {
+  unsigned long currentMillis = millis();
+
   if (isFermentationMode)
   {
     int16_t knockVal = analogRead(KNOCK_PIN) / 16;
@@ -147,7 +177,7 @@ void loop()
         lastKnock = fermentationStartTime;
 
         clearScreen();
-        tft.setCursor(0, 10);
+        tft.setCursor(0, 30);
         tft.setTextColor(ILI9341_YELLOW);
         tft.setTextSize(2);
         tft.print("Fermentation started");
@@ -171,8 +201,6 @@ void loop()
   }
   else if (isBrewingMode)
   {
-    unsigned long currentMillis = millis();
-
     if (currentMillis - previousTempMillis > tempInterval)
     {
       previousTempMillis = currentMillis;
@@ -202,19 +230,35 @@ void loop()
 
       displayTime(elapsedTime);
     }
+  }
 
-    if (currentMillis - previousPostMillis > postInterval)
+  if (currentMillis - previousBattMillis > battInterval)
+  {
+    previousBattMillis = millis();
+
+    int battLevel = getBatteryPercantage();
+
+    displayBattLevel(battLevel);
+    Particle.publish(messageBase + "batt-level", String(battLevel));
+
+    if (battLevel < BATT_LOW_VOLTAGE)
     {
-      previousPostMillis = millis();
+      displayLowBattAlert();
+      Particle.publish(messageBase + "alert", "low-batt");
+    }
+  }
 
-      if (isBrewingMode)
-      {
-        postTemp(lastTemp);
-      }
-      else if (isFermentationMode)
-      {
-        postFermentationRate();
-      }
+  if (currentMillis - previousPostMillis > postInterval)
+  {
+    previousPostMillis = millis();
+
+    if (isBrewingMode)
+    {
+      postTemp(lastTemp);
+    }
+    else if (isFermentationMode)
+    {
+      postFermentationRate();
     }
   }
 }
@@ -245,6 +289,14 @@ long getFermentationRate()
   return rate;
 }
 
+int checkBatterylevel(String args)
+{
+  int battLevel = getBatteryPercantage();
+  Particle.publish(messageBase + "batt-level", String(battLevel));
+
+  return 1;
+}
+
 int checkFermentationRate(String args)
 {
   if (isFermentationMode)
@@ -270,11 +322,17 @@ int checkTemp(String args)
   return 0;
 }
 
+int getBatteryPercantage()
+{
+  int voltage = analogRead(BATT) * 0.0011224;
+
+  return (int)((voltage / 4.2) * 100 + 0.5);
+}
+
 void activateBrewStage()
 {
   startTime = millis();
 
-  displayStageName(brewStage);
   displayTempHeading();
   displayTempHistoryHeading();
   displayTimeHeading();
@@ -363,9 +421,16 @@ void printSplash()
   delay(3000);
 }
 
+void clearTopBar()
+{
+  tft.fillRect(0, 0, 240, 30, ILI9341_BLACK);
+  tft.setCursor(0, 0);
+  tft.setTextColor(ILI9341_WHITE);
+}
+
 void clearScreen()
 {
-  tft.fillScreen(ILI9341_BLACK);
+  tft.fillRect(0, 30, 240, 320, ILI9341_BLACK);
   tft.setCursor(0, 0);
   tft.setTextColor(ILI9341_WHITE);
 }
@@ -424,7 +489,7 @@ void printReading(float reading)
   }
   else if (reading > 110)
   {
-    tft.setTextSize(ILI9341_RED);
+    tft.setTextColor(ILI9341_RED);
   }
 
   tft.setTextSize(tempTextSize);
@@ -445,7 +510,7 @@ void displayStageName(String stagename)
 
 void displayFermentationHeading()
 {
-  tft.setCursor(0, 100);
+  tft.setCursor(0, 110);
   tft.setTextSize(2);
   tft.println("Fermentation Rate");
   tft.println("(in seconds)");
@@ -455,7 +520,7 @@ void displayFermentationModeDelta()
 {
   unsigned long fermentationDelta = fermentationStartTime - fermentationModeStartTime;
 
-  tft.setCursor(0, 40);
+  tft.setCursor(0, 60);
   tft.setTextSize(2);
   tft.println("Time to fermentation (hours)");
   tft.println(fermentationDelta / 36000000.00);
@@ -484,8 +549,8 @@ void displayTempHistoryHeading()
 
 void displayFermentationRate(long rate)
 {
-  tft.fillRect(0, 80, 240, fermentationRateSize * pixelMultiplier, ILI9341_BLACK);
-  tft.setCursor(0, 80);
+  tft.fillRect(0, 150, 240, fermentationRateSize * pixelMultiplier, ILI9341_BLACK);
+  tft.setCursor(0, 150);
   tft.setTextSize(fermentationRateSize);
   tft.println(rate);
 }
@@ -498,6 +563,25 @@ void displayTime(float elapsedTime)
   tft.setCursor(0, 140);
   tft.setTextSize(elapsedTimeSize);
   tft.println(timeString);
+}
+
+void displayBattLevel(int voltage)
+{
+  clearTopBar();
+  tft.setCursor(160, 10);
+  tft.setTextSize(1);
+  tft.print("Batt: ");
+  tft.print(voltage);
+  tft.println("%");
+}
+
+void displayLowBattAlert()
+{
+  tft.setCursor(10, 10);
+  tft.setTextSize(2);
+  tft.setTextColor(ILI9341_RED);
+  tft.println("LOW BATT");
+  tft.setTextColor(ILI9341_WHITE);
 }
 
 String calcTimeToDisplay(float elapsedTime)
@@ -573,4 +657,9 @@ void updateChart(float temp)
     //Queue the front value back onto the end of the array
     tempGraphArray.enqueue(currentLocation);
   }
+}
+
+void mqttCB(char *topic, byte *payload, unsigned int length)
+{
+  Particle.publish("mqtt/sub", topic);
 }
