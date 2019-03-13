@@ -177,7 +177,7 @@ void loop()
         lastKnock = fermentationStartTime;
 
         clearScreen();
-        tft.setCursor(0, 10);
+        tft.setCursor(0, 30);
         tft.setTextColor(ILI9341_YELLOW);
         tft.setTextSize(2);
         tft.print("Fermentation started");
@@ -234,6 +234,8 @@ void loop()
 
   if (currentMillis - previousBattMillis > battInterval)
   {
+    previousBattMillis = millis();
+
     int battLevel = getBatteryPercantage();
 
     displayBattLevel(battLevel);
@@ -508,7 +510,7 @@ void displayStageName(String stagename)
 
 void displayFermentationHeading()
 {
-  tft.setCursor(0, 100);
+  tft.setCursor(0, 110);
   tft.setTextSize(2);
   tft.println("Fermentation Rate");
   tft.println("(in seconds)");
@@ -518,7 +520,7 @@ void displayFermentationModeDelta()
 {
   unsigned long fermentationDelta = fermentationStartTime - fermentationModeStartTime;
 
-  tft.setCursor(0, 40);
+  tft.setCursor(0, 60);
   tft.setTextSize(2);
   tft.println("Time to fermentation (hours)");
   tft.println(fermentationDelta / 36000000.00);
@@ -547,8 +549,8 @@ void displayTempHistoryHeading()
 
 void displayFermentationRate(long rate)
 {
-  tft.fillRect(0, 80, 240, fermentationRateSize * pixelMultiplier, ILI9341_BLACK);
-  tft.setCursor(0, 80);
+  tft.fillRect(0, 150, 240, fermentationRateSize * pixelMultiplier, ILI9341_BLACK);
+  tft.setCursor(0, 150);
   tft.setTextSize(fermentationRateSize);
   tft.println(rate);
 }
