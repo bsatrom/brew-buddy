@@ -323,7 +323,6 @@ void activateBrewStage()
 {
   startTime = millis();
 
-  displayStageName(brewStage);
   displayTempHeading();
   displayTempHistoryHeading();
   displayTimeHeading();
@@ -414,7 +413,7 @@ void printSplash()
 
 void clearScreen()
 {
-  tft.fillScreen(ILI9341_BLACK);
+  tft.fillRect(0, 30, 240, 320, ILI9341_BLACK);
   tft.setCursor(0, 0);
   tft.setTextColor(ILI9341_WHITE);
 }
