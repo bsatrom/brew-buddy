@@ -13,12 +13,15 @@
 #include "SdFat.h"
 
 // Include MQTT Library to enable the Azure IoT Hub to call back to our device
-#include "MQTT.h"
+#include "MQTT-TLS.h"
+#include "certs/certs.h"
 
 // App Version Constant
 #define APP_VERSION "v1.0"
 
 SYSTEM_THREAD(ENABLED);
+
+String deviceID;
 
 // Thermocouple Variables
 const uint8_t CHIP_SELECT_PIN = D4;
@@ -107,6 +110,7 @@ MQTT client("brew-buddy-hub.azure-devices.net", 8883, mqttCB);
 void setup()
 {
   Serial.begin(9600);
+  deviceID = System.deviceID();
 
   pinMode(KNOCK_PIN, INPUT_PULLDOWN);
 
@@ -140,22 +144,28 @@ void setup()
   printSubheadingLine("Waiting for Brew...");
 
   // Check and display the battery level
-  int voltage = getBatteryPercantage();
-  displayBattLevel(voltage);
+  int battLevel = getBattPercentage();
+  displayBattLevel(battLevel);
+
+  waitUntil(Particle.connected);
+
+  Particle.publish("Version", APP_VERSION);
+  Particle.publish("Status", "Brew Buddy Online");
 
   //Connect to Azure MQTT Server
-  /* client.connect("e00fce681290df8ab5487791", "brew-buddy-hub.azure-devices.net/e00fce681290df8ab5487791/?api-version=2018-06-30", "SharedAccessSignature sr=brew-buddy-hub.azure-devices.net&sig=RKWH%2FV8CD595YeAnXOZ8jXsSYMnWf6RiJBnzhUoxCzE%3D&skn=iothubowner&se=1552683541");
+  client.enableTls(certificates, sizeof(certificates));
+  client.connect(deviceID, "brew-buddy-hub.azure-devices.net/" + deviceID, "SharedAccessSignature sr=brew-buddy-hub.azure-devices.net&sig=RKWH%2FV8CD595YeAnXOZ8jXsSYMnWf6RiJBnzhUoxCzE%3D&skn=iothubowner&se=1552683541");
   if (client.isConnected())
   {
     Particle.publish("mqtt/status", "connected");
+    client.subscribe("startBrew");
+    client.subscribe("startFerment");
+    client.subscribe("stopAll");
   }
   else
   {
     Particle.publish("mqtt/status", "failed");
-  } */
-
-  Particle.publish("Version", APP_VERSION);
-  Particle.publish("Status", "Brew Buddy Online");
+  }
 }
 
 void loop()
@@ -236,7 +246,7 @@ void loop()
   {
     previousBattMillis = millis();
 
-    int battLevel = getBatteryPercantage();
+    int battLevel = getBattPercentage();
 
     displayBattLevel(battLevel);
     Particle.publish(messageBase + "batt-level", String(battLevel));
@@ -291,7 +301,7 @@ long getFermentationRate()
 
 int checkBatterylevel(String args)
 {
-  int battLevel = getBatteryPercantage();
+  int battLevel = getBattPercentage();
   Particle.publish(messageBase + "batt-level", String(battLevel));
 
   return 1;
@@ -322,7 +332,7 @@ int checkTemp(String args)
   return 0;
 }
 
-int getBatteryPercantage()
+int getBattPercentage()
 {
   int voltage = analogRead(BATT) * 0.0011224;
 
