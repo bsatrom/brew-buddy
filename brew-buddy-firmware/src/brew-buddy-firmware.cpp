@@ -159,6 +159,7 @@ void setup()
   Particle.function("checkBatt", checkBatterylevel);
 
   // Initialize TFT
+  /*
   tft.begin(TFT_SPEED);
 
   Serial.print("Initializing SD card...");
@@ -176,10 +177,11 @@ void setup()
 
   tft.fillScreen(ILI9341_BLACK);
   printSubheadingLine("Waiting for Brew...");
+  */
 
   // Check and display the battery level
   int battLevel = getBattPercentage();
-  displayBattLevel(battLevel);
+  //displayBattLevel(battLevel);
 
   waitUntil(Particle.connected);
 
@@ -188,13 +190,15 @@ void setup()
 
   //Connect to Azure MQTT Server
   client.enableTls(certificates, sizeof(certificates));
-  client.connect(deviceID, "brew-buddy-hub.azure-devices.net/" + deviceID, "SharedAccessSignature sr=brew-buddy-hub.azure-devices.net&sig=RKWH%2FV8CD595YeAnXOZ8jXsSYMnWf6RiJBnzhUoxCzE%3D&skn=iothubowner&se=1552683541");
+  client.connect(deviceID, "brew-buddy-hub.azure-devices.net/" + deviceID, "SharedAccessSignature sr=brew-buddy-hub.azure-devices.net&sig=kNKhEIQaObc74GPvEoK4fi3W1ot65f5aQDOFnTdkaqY%3D&skn=iothubowner&se=1553119278");
   if (client.isConnected())
   {
     Particle.publish("mqtt/status", "connected");
-    client.subscribe("startBrew");
-    client.subscribe("startFerment");
-    client.subscribe("stopAll");
+    bool methodSubResult = client.subscribe("$iothub/methods/#", MQTT::QOS0);
+    bool msgSubResult = client.subscribe("devices/" + deviceID + "/messages/devicebound/#", MQTT::QOS0);
+
+    Particle.publish("matt/method-sub-result", methodSubResult ? "subscribed to hub methods" : "subscription failed");
+    Particle.publish("matt/method-sub-result", msgSubResult ? "subscribed to hub messages" : "subscription failed");
   }
   else
   {
@@ -304,6 +308,11 @@ void loop()
     {
       postFermentationRate();
     }
+  }
+
+  if (client.isConnected())
+  {
+    client.loop();
   }
 }
 
@@ -705,5 +714,16 @@ void updateChart(float temp)
 
 void mqttCB(char *topic, byte *payload, unsigned int length)
 {
-  Particle.publish("mqtt/sub", topic);
+  char pload[length + 1];
+  memcpy(pload, payload, length);
+  pload[length] = NULL;
+
+  Serial.printlnf("Topic: %s", topic);
+  Serial.printlnf("Payload: %s", String(pload));
+
+  Particle.publish("mqtt/rec-topic", topic);
+  Particle.publish("mqtt/rc-payload", String(pload));
+
+  // Need to pull msg id out of topic
+  client.publish("$iothub/methods/res/1/?$rid=" + NULL, "Message Received!");
 }
