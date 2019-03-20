@@ -16,6 +16,10 @@
 #include "MQTT-TLS.h"
 #include "certs/certs.h"
 
+// Json parser for working with MQTT responses from Azure IoT Hub
+#include "JsonParserGeneratorRK.h"
+JsonParserStatic<2048, 100> jsonParser;
+
 // App Version Constant
 #define APP_VERSION "v1.0"
 
@@ -125,7 +129,6 @@ void setup()
   Particle.function("checkBatt", checkBatterylevel);
 
   // Initialize TFT
-  /*
   tft.begin(TFT_SPEED);
 
   Serial.print("Initializing SD card...");
@@ -143,7 +146,6 @@ void setup()
 
   tft.fillScreen(ILI9341_BLACK);
   printSubheadingLine("Waiting for Brew...");
-  */
 
   // Check and display the battery level
   int battLevel = getBattPercentage();
@@ -685,11 +687,17 @@ void mqttCB(char *topic, byte *payload, unsigned int length)
   pload[length] = NULL;
 
   Serial.printlnf("Topic: %s", topic);
-  Serial.printlnf("Payload: %s", String(pload));
+  Serial.printlnf("Payload: %s", pload);
 
-  Particle.publish("mqtt/rec-topic", topic);
-  Particle.publish("mqtt/rc-payload", String(pload));
+  jsonParser.clear();
+  jsonParser.addString(pload);
 
-  // Need to pull msg id out of topic
-  client.publish("$iothub/methods/res/1/?$rid=" + NULL, "Message Received!");
+  if (jsonParser.parse())
+  {
+    String methodName = jsonParser.getReference().key("methodName").valueString();
+
+    Particle.publish("mqtt/message-method", methodName);
+
+    setBrewMode(methodName);
+  }
 }
