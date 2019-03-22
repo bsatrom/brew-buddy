@@ -36,6 +36,7 @@ void clearScreen();
 void printHeadingTextLine(String text);
 void printSubheadingLine(String text);
 float readTemp();
+void postSensorData();
 void postTemp(float temp);
 void postFermentationRate();
 void printReading(float reading);
@@ -192,7 +193,7 @@ void setup()
 
   //Connect to Azure MQTT Server
   client.enableTls(certificates, sizeof(certificates));
-  client.connect(deviceID, "brew-buddy-hub.azure-devices.net/" + deviceID, "SharedAccessSignature sr=brew-buddy-hub.azure-devices.net&sig=kNKhEIQaObc74GPvEoK4fi3W1ot65f5aQDOFnTdkaqY%3D&skn=iothubowner&se=1553119278");
+  client.connect(deviceID, "brew-buddy-hub.azure-devices.net/" + deviceID, "SharedAccessSignature sr=brew-buddy-hub.azure-devices.net&sig=PQZleYaaxEu5VDlE9NTjKWpN%2FnZdL2MBu%2B0A5Xl2YbM%3D&skn=iothubowner&se=1553642020");
   if (client.isConnected())
   {
     Particle.publish("mqtt/status", "connected");
@@ -310,6 +311,8 @@ void loop()
     {
       postFermentationRate();
     }
+
+    postSensorData();
   }
 
   if (client.isConnected())
@@ -517,6 +520,21 @@ float readTemp()
     Serial.println("Could not read temp");
     return 0;
   }
+}
+
+void postSensorData()
+{
+  JsonWriterStatic<256> jsonWriter;
+
+  {
+    JsonWriterAutoObject obj(&jsonWriter);
+
+    jsonWriter.insertKeyValue("temperature", lastTemp);
+    jsonWriter.insertKeyValue("fermentation-rate", fermentationRate);
+    jsonWriter.insertKeyValue("battery-charge", String(getBattPercentage()));
+  }
+
+  Particle.publish(messageBase + "latest", jsonWriter.getBuffer());
 }
 
 void postTemp(float temp)
