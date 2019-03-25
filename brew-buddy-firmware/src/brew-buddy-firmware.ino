@@ -101,6 +101,7 @@ unsigned long fermentationStartTime = 0;
 QueueArray<long> knockArray;
 float fermentationRate = 0; // knocks per ms
 unsigned long lastKnock;
+#define KNOCK_INTERVAL 50
 
 String messageBase = "bb/";
 
@@ -149,7 +150,7 @@ void setup()
 
   // Check and display the battery level
   int battLevel = getBattPercentage();
-  //displayBattLevel(battLevel);
+  displayBattLevel(battLevel);
 
   waitUntil(Particle.connected);
 
@@ -205,7 +206,7 @@ void loop()
         waitUntil(Particle.connected);
         Particle.publish(messageBase + "ferment/state", "start");
       }
-      else
+      else if (millis() - lastKnock > KNOCK_INTERVAL)
       {
         knockArray.push(millis() - lastKnock);
         lastKnock = millis();
