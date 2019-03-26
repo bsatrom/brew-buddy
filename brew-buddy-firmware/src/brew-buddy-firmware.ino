@@ -163,11 +163,9 @@ void setup()
   if (client.isConnected())
   {
     Particle.publish("mqtt/status", "connected");
-    bool methodSubResult = client.subscribe("$iothub/methods/#", MQTT::QOS0);
     bool msgSubResult = client.subscribe("devices/" + deviceID + "/messages/devicebound/#", MQTT::QOS0);
 
-    Particle.publish("matt/method-sub-result", methodSubResult ? "subscribed to hub methods" : "subscription failed");
-    Particle.publish("matt/method-sub-result", msgSubResult ? "subscribed to hub messages" : "subscription failed");
+    Particle.publish("mqtt/message-sub-result", msgSubResult ? "subscribed to hub messages" : "subscription failed");
   }
   else
   {
